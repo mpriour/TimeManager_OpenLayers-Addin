@@ -5,10 +5,6 @@
 
 
 /**
- * @requires OpenLayers/Control.js
- */
-
-/**
  * Class: OpenLayers.Control.TimeManager
  * Control to display and animate map layers across time.
  *
