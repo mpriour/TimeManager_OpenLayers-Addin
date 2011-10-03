@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <title>OpenLayers: WMS + Time</title>
+    <link rel="stylesheet" href="../theme/default/style.css" type="text/css">
+    <link rel="stylesheet" href="style.css" type="text/css">
+    <style>
+        .tallmap{
+            width: 700px;
+            height: 500px;
+            border: 1px solid #ccc;
+        }
+    </style>
+    <script src="../lib/OpenLayers.js"></script>
+    <script type="text/javascript">
+        var map, pts_wms, line_wms, radii_wms, osm;
+        function init(){
+            osm = new OpenLayers.Layer.OSM();
+            
+            map = new OpenLayers.Map('map', {
+                allOverlays: false,
+                projection: 'EPSG:900913',
+                maxExtent: osm.maxExtent.clone(),
+                maxResolution: osm.maxResolution
+            });
+            
+            startTime = OpenLayers.Date.parse('2011-08-18T12:00:00.000Z').toISOString();			
+
+            storm_wms = new OpenLayers.Layer.WMS("Irene Eye & Storm Winds",
+            "http://mapstory.demo.opengeo.org:8080/geoserver/wms", {
+				layers: "irene_11_pts,irene_11_radii",
+				transparent: true,
+				format: 'image/png',
+				srs:'EPSG:900913',
+                time:startTime
+			},{
+				metadata: {
+                    timeInterval: 
+                        ['2011-08-18T12:00Z/2011-08-29T00:00Z']
+                },
+            singleTile:true,
+            ratio:1,
+            transitionEffect:'resize',
+    		visibility:true
+		});
+
+        ia_wms = new OpenLayers.Layer.WMS("Nexrad", "http://mesonet.agron.iastate.edu/cgi-bin/wms/nexrad/n0r-t.cgi?", {
+            layers: "nexrad-n0r-wmst",
+            transparent: true,
+            format: 'image/png',
+            time:startTime
+        }, {
+            metadata: {
+                timeInterval: ['2011-08-18T12:00Z/2011-08-29T00:00Z']
+            },
+            singleTile: true,
+            ratio: 1,
+            transitionEffect: 'resize',
+            visibility: true
+        });
+        
+        line_wms = new OpenLayers.Layer.WMS("Irene Storm Track", "http://mapstory.demo.opengeo.org:8080/geoserver/wms", {
+            layers: "irene_11_lin",
+            transparent: true,
+            format: 'image/png',
+            srs: 'EPSG:900913'
+        }, {
+            singleTile: true,
+            ratio: 1,
+            transitionEffect: 'resize',
+            visibility: true
+        });
+			
+		timeCtl = new OpenLayers.Control.TimeManager({
+			units:OpenLayers.TimeUnit.HOURS,
+			step:6,
+			frameRate:0.85
+		});
+		timeCtl.events.on({
+			'tick': update_date,
+			'reset': update_date,
+			'stop': function(evt){if (evt.rangeExceeded) timeCtl.reset()},
+			scope: timeCtl
+		});
+
+        map.addControls([timeCtl,new OpenLayers.Control.LayerSwitcher()]);
+        map.addLayers([osm,ia_wms,line_wms,storm_wms]);
+        map.zoomToExtent(new OpenLayers.Bounds(-8627260.535278,1425478.519205,-3729202.941056,5496444.989113));
+		update_date({
+			object: timeCtl,
+			currentTime: timeCtl.currentTime
+		});
+    }
+        function update_date(evt) {
+            var time = this.currentTime||evt.currentTime;
+	    OpenLayers.Util.getElement('timestamp').innerHTML = time.toString();
+        }
+    </script>
+  </head>
+  <body onload="init()">
+     <h1 id="title"> WMS Time Example - Hurricane Irene Aug 2011</h1>
+        <div id="tags">
+            wmst, wms-t
+        </div>
+        <p id="shortdesc">
+            Shows the use of the TimeManager control with a single simple WMS-T (time) layer served from Geoserver<br>
+			Click on the PLAY button to start.
+        </p>
+	<h2 id="timestamp"></h2>   
+	<div>
+		<button type="button" onclick="timeCtl.loop=false;timeCtl.stop()">Stop</button>
+		&nbsp;|&nbsp;<button type="button" onclick="timeCtl.reset()">Reset</button>
+		&nbsp;|&nbsp;<button type="button" onclick="timeCtl.loop=true;timeCtl.play()">Loop</button>
+		&nbsp;|&nbsp;<button type="button" onclick="timeCtl.tick()">Step</button>
+		&nbsp;|&nbsp;<button type="button" onclick="timeCtl.play()">Play</button>
+	</div>
+    <div id="map" class="tallmap"></div>
+    <div id="docs">
+        <p>Time Control example: hit PLAY, and the storm position will change along with the<br>
+		time display. Uses the OpenLayers.Control.TimeManager to update the date<br>
+		elements with the time of the animation. Starts at Aug 17, 2011 and continues until
+        Aug 29, 2011 or until you stop it</p>
+    </div>
+  </body>
+</html>
+
+
+

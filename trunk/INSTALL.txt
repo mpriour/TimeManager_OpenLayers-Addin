@@ -1,0 +1,16 @@
+For using the addin in development mode, copy the addins folder from the
+sandbox into the OpenLayers directory that also contains the lib, theme, img
+and other folders. Add a script tag for
+... 
+lib/OpenLayers/Control/TimeManager.js
+lib/OpenLayers/TimeAgent.js
+lib/OpenLayers/TimeAgent/WMS.js
+...
+to your application's html.
+
+For creating a single file build, copy the content of the
+addins/timedpointtrack/trunk folder to the OpenLayers directory that also contains
+the lib, theme and other folders. Add the new javascript files to the include
+section of your build profile and do the build as usual. You do not need to
+include an extra script tag in your html, because all required js is already
+included in the OpenLayers single file build.
