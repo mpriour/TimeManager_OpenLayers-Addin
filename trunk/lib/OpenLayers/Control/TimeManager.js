@@ -5,6 +5,10 @@
 
 
 /**
+ * @requires OpenLayers/Control.js
+ */
+
+/**
  * Class: OpenLayers.Control.TimeManager
  * Control to display and animate map layers across time.
  *
@@ -30,12 +34,15 @@ OpenLayers.Control.TimeManager = OpenLayers.Class(OpenLayers.Control, {
      *      its configured time range (true) or due to the stop function call
      *      (false). This event will only fire on the stop function call during
      *      a loop-mode animation.
+     *  - *rangemodified* Triggered when the control adds or removes layers which
+     *      affect the range or interval of the control or when the range is set
+     *      programattically.     
      *  - *reset* Triggered when the control resets a time-series animation.
      *      Listeners receive an event object with a {Boolean} *looped*
      *      property indicating the control reset due to running in looped mode
      *      (true) or the reset function call (false)
      */
-    EVENT_TYPES: ["beforetick","tick","play","stop","reset"],
+    EVENT_TYPES: ["beforetick","tick","play","stop","reset","rangemodified"],
 
 
     /**
@@ -77,7 +84,16 @@ OpenLayers.Control.TimeManager = OpenLayers.Class(OpenLayers.Control, {
      *     http://tools.ietf.org/html/rfc3339) or Date objects.
 	 */
 	intervals:null,
-		
+    
+    /**
+     * APIProperty: timespans
+     * {Array(Object|String)} Array of valid start,end,resolution objects
+     *     series animation can use. (Optional)
+     *     Note: You can use an ISO 8601 formated string (see 
+     *     http://tools.ietf.org/html/rfc3339) or Date objects.
+     */
+    timespans:null,
+    
 	/**
 	 * APIProperty: frameRate
 	 * {Number} A positive floating point number of frames (or ticks) per 
@@ -110,6 +126,7 @@ OpenLayers.Control.TimeManager = OpenLayers.Class(OpenLayers.Control, {
 	 *     Default: 1
 	 */
     maxFrameDelay:1,
+    
     /**
 	 * APIProperty: currentTime
 	 * {Date} The current time of the time-series animation
@@ -190,12 +207,16 @@ OpenLayers.Control.TimeManager = OpenLayers.Class(OpenLayers.Control, {
         if (!this.timeAgents) {
             for (var i = 0, len = map.layers.length; i < len; i++) {
                 var lyr = map.layers[i];
+                if (lyr.dimensions && lyr.dimensions.time){
+                    !lyr.metadata && (lyr.metadata={});
+                    lyr.metadata.timeInterval=this.timeExtentsToIntervals(lyr)}
                 if ((lyr.dimensions && lyr.dimensions.time) || (lyr.metadata.timeInterval && lyr.metadata.timeInterval.length)) {
                     if (!this.layers) this.layers = [];
                     this.layers.push(lyr);
                 }
             }
             this.timeAgents = this.buildTimeAgents(this.layers)
+            this.timeSpans = this.getValidTimeSpans()
         }
         //if no interval was specified & interval !== false, get from timeAgents
         if(!this.intevals && this.intervals !== false){
@@ -206,7 +227,9 @@ OpenLayers.Control.TimeManager = OpenLayers.Class(OpenLayers.Control, {
             this.range = this.buildRange(this.timeAgents);
             if(this.range)this.currentTime = new Date(this.range[(this.step>0)?0:1].getTime())
         }
-        
+        if(this.range || this.intervals){
+            this.events.triggerEvent('rangemodified');
+        }
         //set map agents for layer additions and removal
         this.map.events.on({
             'addlayer':this.onAddLayer,
@@ -240,9 +263,12 @@ OpenLayers.Control.TimeManager = OpenLayers.Class(OpenLayers.Control, {
             //values to real dates
             if(added){
                 var lyrIntervals = lyr.metadata.timeInterval;
-                if (lyrIntervals.length > 2 && !this.fixedIntervals) {
+                if (lyrIntervals.length && lyrIntervals[0] instanceof Date && !this.fixedIntervals) {
                     this.intervals || (this.intervals = []);
+                    var oldIntervalsLen = this.intervals.length,
+                    oldRange=[this.range[0]||new Date(1),this.range[1]||new Date(1)]
                     this.intervals = this.getUniqueDates(this.intervals.concat(lyrIntervals));
+                    this.timeSpans = this.getValidTimeSpans();
                     //adjust range as needed
                     if(!this.range){
                         this.setRange([this.intervals[0],this.intervals[this.intervals.length-1]])
@@ -250,13 +276,16 @@ OpenLayers.Control.TimeManager = OpenLayers.Class(OpenLayers.Control, {
                     else if(this.intervals[0]<this.range[0]||this.intervals[1]>this.range[1]){
                         this.setRange([Math.min(this.intervals[0],this.range[0]),Math.max(this.intervals[1],this.range[1])])
                     }
+                    if(oldIntervalsLen!=this.intervals.length || oldRange[0].getTime()!=range[0].getTime() || oldRange[1].getTime()!=range[1].getTime()){
+                        this.events.triggerEvent('rangemodified')
+                    }
                 }
                 else if(!this.fixedRange){
                     if(!this.range){
-                        this.setRange(lyrIntervals);
+                        this.setRange([lyrIntervals.start,lyrIntervals.end]);
                     }
-                    else if(lyrIntervals[0]<this.range[0]||lyrIntervals[1]>this.range[1]){
-                        this.setRange([Math.min(lyrIntervals[0],this.range[0]),Math.max(lyrIntervals[1],this.range[1])])
+                    else if(lyrIntervals.start<this.range[0]||lyrIntervals.end>this.range[1]){
+                        this.setRange([Math.min(lyrIntervals.start,this.range[0]),Math.max(lyrIntervals.end,this.range[1])])
                     }
                 }
             }
@@ -276,18 +305,19 @@ OpenLayers.Control.TimeManager = OpenLayers.Class(OpenLayers.Control, {
                         this.timeAgents.splice(i,1);
                         agent.destroy();
                     }
+                    this.timeSpans = this.getValidTimeSpans();
                     break;
                 }
             }
-            if(lyrIntervals.length>2 && !this.fixedIntervals){
+            if(lyrIntervals.length && lyrIntervals[0] instanceof Date && !this.fixedIntervals){
                 this.intervals = this.buildIntervals(this.timeAgents);
                 if(this.intervals[0]<this.range[0]||this.intervals[1]>this.range[1]){
                     this.setRange([Math.min(this.intervals[0],this.range[0]),Math.max(this.intervals[1],this.range[1])])
                 }
             }
             else if(!this.fixedRange){
-                if (lyrIntervals[0].getTime() == this.range[0].getTime() || lyrIntervals[1].getTime() == this.range[1].getTime()) {
-                    this.setRange(this.buildRange(this.timeAgents));
+                if(lyrIntervals.start<this.range[0]||lyrIntervals.end>this.range[1]){
+                   this.setRange([Math.min(lyrIntervals.start,this.range[0]),Math.max(lyrIntervals.end,this.range[1])])
                 }
             }
         }
@@ -374,11 +404,15 @@ OpenLayers.Control.TimeManager = OpenLayers.Class(OpenLayers.Control, {
 	 *     or ISO 8601 formatted strings
 	 */
 	setRange:function(range){
-		if(!(range[0] instanceof Date))range[0]=OpenLayers.Date.parse(range[0]);
+		var oldRange = [this.range[0].getTime(),this.range[0].getTime()];
+        if(!(range[0] instanceof Date))range[0]=OpenLayers.Date.parse(range[0]);
 		if(!(range[1] instanceof Date))range[1]=OpenLayers.Date.parse(range[1]);
 		this.range=range;
 		//set current time to correct location if the timer isn't running yet.
 		if(!this.timer){this.currentTime = new Date(this.range[(this.step>0)?0:1].getTime())}
+        if(this.range[0].getTime()!=oldRange[0]||this.range[1].getTime()!=oldRange[1]){
+            this.events.triggerEvent("rangemodified");
+        }
 	},
 	/**
 	 * APIMethod:setStart
@@ -395,6 +429,7 @@ OpenLayers.Control.TimeManager = OpenLayers.Class(OpenLayers.Control, {
 		this.range[(this.step>0)?0:1]=time;
 		//set current time to this start time if we haven't already started
 		!this.timer && (this.currentTime=new Date(time.getTime()));
+        this.events.triggerEvent("rangemodified");
 	},
 	/**
 	 * APIMethod:setEnd
@@ -409,6 +444,7 @@ OpenLayers.Control.TimeManager = OpenLayers.Class(OpenLayers.Control, {
 	setEnd:function(time){
 		if(!(time instanceof Date))time=OpenLayers.Date.parse(time);
 		this.range[(this.step>0)?1:0]=time;
+        this.events.triggerEvent("rangemodified");
 	},
 	/**
 	 * APIMethod:setTime
@@ -550,6 +586,7 @@ OpenLayers.Control.TimeManager = OpenLayers.Class(OpenLayers.Control, {
         return (range.length)?range:null;
     },
     guessPlaybackRate:function(){
+        if(!this.timeAgents){return false}
         var timeSpans=this.getValidTimeSpans();
         if (timeSpans) {
             timeSpans.sort(function(a, b){
