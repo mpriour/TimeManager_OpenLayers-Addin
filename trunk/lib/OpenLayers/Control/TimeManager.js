@@ -164,7 +164,7 @@ OpenLayers.Control.TimeManager = OpenLayers.Class(OpenLayers.Control, {
                     this.guessPlaybackRate()
                 }
                 else {
-                    this.events.un({'play': arguments.caller.callee,scope: this})
+                    this.events.un({'play': arguments.callee,scope: this})
                 }
             },scope:this
         })
