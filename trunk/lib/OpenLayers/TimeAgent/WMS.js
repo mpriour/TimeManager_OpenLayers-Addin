@@ -102,7 +102,7 @@ OpenLayers.TimeAgent.WMS = OpenLayers.Class(OpenLayers.TimeAgent,{
     
 	onTick:function(evt){
 		this.currentTime = evt.currentTime || this.timeManager.currentTime;
-        console.log('CurrentTime:'+this.currentTime.toTimeString());
+        console.debug('CurrentTime:'+this.currentTime.toString());
 		var inrange = this.currentTime <= this.range[1] && this.currentTime >= this.range[0];
         if (inrange) {
             this.loadQueue = OpenLayers.Array.filter(this.layers, function(lyr){return lyr.visibility}).length;
