@@ -3,7 +3,6 @@
  * See http://svn.openlayers.org/trunk/openlayers/license.txt for the
  * full text of the license. */
 
-
 /**
  * Class: OpenLayers.Control.TimeManager
  * Control to display and animate map layers across time.
@@ -205,7 +204,7 @@ OpenLayers.Control.TimeManager = OpenLayers.Class(OpenLayers.Control, {
                 var lyr = map.layers[i];
                 if (lyr.dimensions && lyr.dimensions.time){
                     !lyr.metadata && (lyr.metadata={});
-                    lyr.metadata.timeInterval=this.timeExtentsToIntervals(lyr)}
+                    lyr.metadata.timeInterval=this.timeExtentsToIntervals(lyr.dimensions.time.values)}
                 if ((lyr.dimensions && lyr.dimensions.time) || (lyr.metadata.timeInterval && lyr.metadata.timeInterval.length)) {
                     if (!this.layers) this.layers = [];
                     this.layers.push(lyr);
@@ -236,7 +235,7 @@ OpenLayers.Control.TimeManager = OpenLayers.Class(OpenLayers.Control, {
     onAddLayer: function(evt){
         var lyr = evt.layer;
         if(lyr.dimensions && lyr.dimensions.time){
-            lyr.metadata.timeInterval = this.timeExtentsToIntervals(lyr.dimensions.time)
+            lyr.metadata.timeInterval = this.timeExtentsToIntervals(lyr.dimensions.time.values)
         }
         var added=false;
         if (lyr.metadata.timeInterval && !this.fixedLayers) {
@@ -498,7 +497,7 @@ OpenLayers.Control.TimeManager = OpenLayers.Class(OpenLayers.Control, {
 		//categorize layers and separate into arrays for use in subclasses
 		for(var i=0,len=layers.length;i<len;i++){
 			var lyr = layers[i];
-            if(lyr.dimensions && lyr.dimensions.time){lyr.metadata.timeInterval=this.timeExtentsToIntervals(lyr.dimensions.time)}
+            if(lyr.dimensions && lyr.dimensions.time){lyr.metadata.timeInterval=this.timeExtentsToIntervals(lyr.dimensions.time.values)}
 			//allow user specified overrides and custom behavior
             if (lyr.timeAgent) {
                 var agent;
