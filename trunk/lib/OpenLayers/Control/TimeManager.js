@@ -144,39 +144,55 @@ OpenLayers.Control.TimeManager = OpenLayers.Class(OpenLayers.Control, {
      *     control.
      */
     initialize: function(options){
-		options = options||{};
-		OpenLayers.Control.prototype.initialize.call(this,options);
-		if(this.intervals){
-			for(var i=0,len=this.intervals.length;i<len;i++){
-				var interval = this.intervals[i];
-				if(!(interval[i] instanceof Date))this.intervals[i]=OpenLayers.Date.parse(interval);
-			}
-            this.intervals.sort(function(a,b){return a-b});
-			this.range=[this.intervals[0],this.intervals[this.intervals.length-1]];
-            this.fixedIntervals=true;
-		}else if(this.range){
-			if(!(this.range[0] instanceof Date))this.range[0]=OpenLayers.Date.parse(this.range[0]);
-			if(!(this.range[1] instanceof Date))this.range[1]=OpenLayers.Date.parse(this.range[1]);
+        options = options ||
+        {};
+        OpenLayers.Control.prototype.initialize.call(this, options);
+        if (this.intervals) {
+            for (var i = 0, len = this.intervals.length; i < len; i++) {
+                var interval = this.intervals[i];
+                if (!(interval[i] instanceof Date)) this.intervals[i] = OpenLayers.Date.parse(interval);
+            }
+            this.intervals.sort(function(a, b){
+                return a - b
+            });
+            this.range = [this.intervals[0], this.intervals[this.intervals.length - 1]];
+            this.fixedIntervals = true;
+        }
+        else if (this.range) {
+            if (!(this.range[0] instanceof Date)) this.range[0] = OpenLayers.Date.parse(this.range[0]);
+            if (!(this.range[1] instanceof Date)) this.range[1] = OpenLayers.Date.parse(this.range[1]);
             this.fixedRange = true;
-		}
-		if (this.range && this.range.length) {
+        }
+        if (this.range && this.range.length) {
             this.currentTime = this.currentTime || new Date(this.range[0].getTime());
         }
-		if (options.layers) {
+        if (options.layers) {
             this.timeAgents = this.buildTimeAgents(options.layers);
-            if(this.timeAgents.length){this.fixedLayers=true;}
+            if (this.timeAgents.length) {
+                this.fixedLayers = true;
+            }
         }
         this.events.on({
             'play': function(){
-                if (!this.units) {
-                    this.guessPlaybackRate()
+                if (this.timeAgents) {
+                    if (!this.units) {
+                        this.guessPlaybackRate()
+                    }
+                    else {
+                        this.events.un({
+                            'play': arguments.callee,
+                            scope: this
+                        })
+                    }
                 }
                 else {
-                    this.events.un({'play': arguments.callee,scope: this})
+                    console.warn("Attempting to play a time manager control without any temporally active layers");
+                    return false;
                 }
-            },scope:this
+            },
+            scope: this
         })
-	},
+    },
 	/**
 	 * APIMethod: destroy
 	 * Destroys the control
@@ -377,9 +393,10 @@ OpenLayers.Control.TimeManager = OpenLayers.Class(OpenLayers.Control, {
 		//ensure that we don't have multiple timers running
 		this.timer && clearInterval(this.timer) && (this.timer=null);
 		//start playing
-		this.events.triggerEvent('play');
-		this.tick();
-		this.timer = setInterval(OpenLayers.Function.bind(this.tick,this),1000/this.frameRate);
+		if (this.events.triggerEvent('play') !== false) {
+            this.tick();
+            this.timer = setInterval(OpenLayers.Function.bind(this.tick, this), 1000 / this.frameRate);
+        }
 	},
 	/**
 	 * APIMethod: stop
