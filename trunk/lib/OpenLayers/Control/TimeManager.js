@@ -134,6 +134,13 @@ OpenLayers.Control.TimeManager = OpenLayers.Class(OpenLayers.Control, {
 	 *     this control "manages". Read-Only
 	 */
 	timeAgents:null,
+    
+    /**
+     * Property: lastTimeIndex
+     * {Number} The array index of the last time used in the control when
+     * snapToIntevals is true.
+     */
+    lastTimeIndex:-1,
 	
 	/**
      * Constructor: OpenLayers.Control.TimeManager
@@ -341,9 +348,10 @@ OpenLayers.Control.TimeManager = OpenLayers.Class(OpenLayers.Control, {
 	 */
 	tick:function(){
 		if(this.intervals && this.snapToIntervals){
-			var newIndex = OpenLayers.Util.indexOf(this.intervals,this.currentTime)+(this.step>0)?1:-1;
+			var newIndex = this.lastTimeIndex+((this.step>0)?1:-1);
 			if (newIndex < this.intervals.length && newIndex>-1) {
 				this.currentTime = this.intervals[newIndex];
+                this.lastTimeIndex = newIndex;
 			}else{
 				//force the currentTime beyond the range
 				this.currentTime = (this.step>0)?new Date(this.range[1].getTime()+100):new Date(this.range[0].getTime()-100);
@@ -358,6 +366,7 @@ OpenLayers.Control.TimeManager = OpenLayers.Class(OpenLayers.Control, {
 			if (this.loop) {
 				this.timer && clearInterval(this.timer) && (this.timer=null);
 				this.currentTime = (this.step>0)?new Date(this.range[0].getTime()):new Date(this.range[1].getTime());
+                this.lastTimeIndex=-1;
 				this.events.triggerEvent('reset',{'looped':true});
 				this.play();
 			}
@@ -375,7 +384,7 @@ OpenLayers.Control.TimeManager = OpenLayers.Class(OpenLayers.Control, {
                 var intervalId,checkCount = 0,maxDelays = this.maxFrameDelay * 4;
                 intervalId = setInterval(OpenLayers.Function.bind(function(){
                     var doTick = this.canTickCheck() || checkCount++ >= maxDelays
-                    if(checkCount>maxDelays){console.log('ADVANCED DUE TO TIME LIMIT')}
+                    if(checkCount>maxDelays){console.debug('ADVANCED DUE TO TIME LIMIT')}
                     if (doTick) {
                         clearInterval(intervalId);
                         this.events.triggerEvent('tick', {currentTime: this.currentTime});

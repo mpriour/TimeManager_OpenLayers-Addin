@@ -130,35 +130,57 @@ OpenLayers.TimeAgent.WMS = OpenLayers.Class(OpenLayers.TimeAgent,{
             }
             isotime=OpenLayers.Date.toISOString(minTime)+'/'+OpenLayers.Date.toISOString(time)
         }
-        else if(layer.metadata.timeInterval[0] instanceof Date && this.intervalMode != "exact"){
-			//find where this time fits into
-            var intervals = layer.metadata.timeInterval; 
-            //first check that this time is in the array
-            for (var i = 0,len=intervals.length; i < len; i++) {
-                if (time.getTime() == intervals[i].getTime()) {
-                    isotime = OpenLayers.Date.toISOString(intervals[i])
-                    break;
-                }
-                else{
-                    var diff = time-intervals[i];
-                    if(diff<0){
-                        if(this.intervalMode=="lastValid"){
-                            isotime = OpenLayers.Date.toISOString(intervals[i-1])
-                        }else{
-                            var useTime = diff>(time-intervals[i-1]) ? intervals[i-1] : intervals[i];
-                            isotime = OpenLayers.Date.toISOString(useTime);
-                        }
-                        break;
-                    }
-                }
+        else if (layer.metadata.timeInterval[0] instanceof Date && this.intervalMode != "exact") {
+            //find where this time fits into
+            var intervals = layer.metadata.timeInterval;
+            var testResults = this.findNearestTimes(time, intervals);
+            var wmstime;
+            if (testResults.exact !== false) {
+                wmstime = intervals[testResults.exact];
             }
-		}else{
-			//format time in ISO:8601 format
-			isotime = OpenLayers.Date.toISOString(time);
-		}
+            else if (this.intervalMode == "lastValid") {
+                wmstime = intervals[testResults.before]
+            }
+            else {
+                wmstime = time - intervals[testResults.before] > time - intervals[testResults.after] ? intervals[testResults.after] : intervals[testResults.before];
+            }
+            isotime = OpenLayers.Date.toISOString(wmstime);
+        }
+        else {
+            //format time in ISO:8601 format
+            isotime = OpenLayers.Date.toISOString(time);
+        }
         layer.mergeNewParams({time:isotime});
 	},
-	
+    /**
+     * 
+     * @param {Object} testDate
+     * @param {Array[{Date}]} dates - MUST be a sorted date array
+     */
+	findNearestTimes: function(testDate,dates){
+        var retObj = {exact:false,before:-1,after:-1}
+        //first check that this time is in the array
+        for (var i = 0, len = dates.length; i < len; i++) {
+            if (testDate.getTime() == dates[i].getTime()) {
+                retObj.exact = i;
+                break;
+            }
+            else {
+                var diff = testDate - dates[i];
+                if (diff < 0) {
+                    retObj.after = i;
+                    if (retObj.before == -1) {
+                        retObj.before = 0
+                    }
+                    break;
+                }
+                else {
+                    retObj.before = i;
+                }
+            }
+        }
+        return retObj;
+    },
     onLayerLoadEnd: function(){
         this.loadQueue--;
         console.debug('QueueCount:'+this.loadQueue)
