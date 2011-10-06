@@ -275,7 +275,7 @@ OpenLayers.Control.TimeManager = OpenLayers.Class(OpenLayers.Control, {
             }
             if (!added) {
                 var agents = this.buildTimeAgents([lyr]);
-                this.timeAgents.push(agents[0]);
+                if (agents) {this.timeAgents.push(agents[0])}
                 added = true;
             }
             //check if layer could be used in a time agent & if so modify the
@@ -479,7 +479,16 @@ OpenLayers.Control.TimeManager = OpenLayers.Class(OpenLayers.Control, {
 	 */
 	setTime:function(time){
 		if(!(time instanceof Date))time=OpenLayers.Date.parse(time);
-		this.currentTime = time;
+        if (this.snapToIntervals) {
+            var nearest = OpenLayers.TimeAgent.WMS.prototype.findNearestTimes.apply(this, [time, this.intervals]);
+            if (nearest.before > -1) {
+                this.currentTime = this.intervals[nearest.before];
+                this.lastTimeIndex = nearest.before
+            }
+        }
+        else {
+            this.currentTime = time;
+        }
         this.events.triggerEvent('tick',{'currentTime':this.currentTime});
 	},
 	/**
