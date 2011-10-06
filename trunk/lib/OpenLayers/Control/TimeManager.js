@@ -264,11 +264,13 @@ OpenLayers.Control.TimeManager = OpenLayers.Class(OpenLayers.Control, {
         if (lyr.metadata.timeInterval && !this.fixedLayers) {
             this.timeAgents || (this.timeAgents = [])
             var agentClass = lyr.CLASS_NAME.match(/\.Layer\.(\w+)/)[1]
-            for (var i = 0, len = this.timeAgents.length; i < len; i++) {
-                if (!lyr.timeAgent && this.timeAgents[i] instanceof OpenLayers.TimeAgent[agentClass]) {
-                    this.timeAgents[i].addLayer(lyr);
-                    added = true;
-                    break;
+            if (agentClass in OpenLayers.TimeAgent) {
+                for (var i = 0, len = this.timeAgents.length; i < len; i++) {
+                    if (!lyr.timeAgent && this.timeAgents[i] instanceof OpenLayers.TimeAgent[agentClass]) {
+                        this.timeAgents[i].addLayer(lyr);
+                        added = true;
+                        break;
+                    }
                 }
             }
             if (!added) {
