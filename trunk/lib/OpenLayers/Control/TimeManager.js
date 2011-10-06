@@ -275,8 +275,10 @@ OpenLayers.Control.TimeManager = OpenLayers.Class(OpenLayers.Control, {
             }
             if (!added) {
                 var agents = this.buildTimeAgents([lyr]);
-                if (agents) {this.timeAgents.push(agents[0])}
-                added = true;
+                if (agents) {
+                    this.timeAgents.push(agents[0])
+                    added = true;
+                }
             }
             //check if layer could be used in a time agent & if so modify the
             //control range & interval as needed. time agent will convert timeInterval
