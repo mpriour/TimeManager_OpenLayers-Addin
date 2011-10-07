@@ -86,7 +86,7 @@ OpenLayers.TimeAgent = OpenLayers.Class({
         }
     },
     removeLayer:function(layer){
-        for(var i=0,len=this.layers.length;i<length;i++){
+        for(var i=0,len=this.layers.length;i<len;i++){
             if(layer==this.layers[i]){
                 this.layers.splice(i,1);
                 break;

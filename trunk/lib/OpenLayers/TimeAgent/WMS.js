@@ -74,28 +74,24 @@ OpenLayers.TimeAgent.WMS = OpenLayers.Class(OpenLayers.TimeAgent,{
 	},
 	
     addLayer:function(layer){
-        OpenLayers.TimeAgent.prototype.addLayer.call(this,layer);
         layer.events.on({
             'loadend': this.onLayerLoadEnd,
             'loadstart': this.onLayerLoadStart,
             scope: this
         })
+        OpenLayers.TimeAgent.prototype.addLayer.call(this,layer);
     },
     removeLayer:function(layer){
-        OpenLayers.TimeAgent.prototype.removeLayer.call(this,layer);
         layer.events.un({
             'loadend': this.onLayerLoadEnd,
             'loadstart': this.onLayerLoadStart,
             scope: this
         })
+        OpenLayers.TimeAgent.prototype.removeLayer.call(this,layer);
     },
     destroy:function(){
-        for (var i = 0, len = this.layers.length; i < len; i++) {
-            this.layers[i].events.un({
-                'loadend': this.onLayerLoadEnd,
-                'loadstart': this.onLayerLoadStart,
-                scope: this
-            })
+        for (var i = this.layers.length-1; i > -1; i--) {
+            this.removeLayer(this.layers[i])
         }
         OpenLayers.TimeAgent.prototype.destroy.call(this);
     },

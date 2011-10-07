@@ -315,11 +315,13 @@ OpenLayers.Control.TimeManager = OpenLayers.Class(OpenLayers.Control, {
         var lyr = evt.layer;
         if(lyr.metadata.timeInterval){
             var lyrIntervals = lyr.metadata.timeInterval;
+            var lyrIndex = OpenLayers.Util.indexOf(this.layers,lyr);
             //find the agent with the layer
             for(var i=0, len = this.timeAgents.length;i<len;i++){
                 var agent = this.timeAgents[i];
                 if(OpenLayers.Util.indexOf(agent.layers,lyr)>-1){
                     agent.removeLayer(lyr);
+                    this.layers.splice(lyrIndex,1);
                     //if the agent doesn't handle any layers, get rid of it
                     if(!agent.layers.length){
                         this.timeAgents.splice(i,1);
@@ -331,14 +333,22 @@ OpenLayers.Control.TimeManager = OpenLayers.Class(OpenLayers.Control, {
             }
             if(lyrIntervals.length && lyrIntervals[0] instanceof Date && !this.fixedIntervals){
                 this.intervals = this.buildIntervals(this.timeAgents);
-                if(this.intervals[0]<this.range[0]||this.intervals[1]>this.range[1]){
-                    this.setRange([Math.min(this.intervals[0],this.range[0]),Math.max(this.intervals[1],this.range[1])])
+                if (this.intervals) {
+                    if (this.intervals[0] < this.range[0] || this.intervals[1] > this.range[1]) {
+                        this.setRange([Math.max(this.intervals[0], this.range[0]), Math.min(this.intervals[1], this.range[1])])
+                    }
                 }
             }
             else if(!this.fixedRange){
-                if(lyrIntervals.start<this.range[0]||lyrIntervals.end>this.range[1]){
-                   this.setRange([Math.min(lyrIntervals.start,this.range[0]),Math.max(lyrIntervals.end,this.range[1])])
+                if (this.timeSpans) {
+                    if (lyrIntervals.start < this.range[0] || lyrIntervals.end > this.range[1]) {
+                        this.setRange([Math.max(lyrIntervals.start, this.range[0]), Math.min(lyrIntervals.end, this.range[1])])
+                    }
                 }
+            }
+            if(!this.fixedRange && !this.fixedIntervals && !this.intervals && !this.timeSpans){
+                //we have NO time layers
+                this.setRange([null,null]);
             }
         }
     },
@@ -427,9 +437,14 @@ OpenLayers.Control.TimeManager = OpenLayers.Class(OpenLayers.Control, {
 	 *     or ISO 8601 formatted strings
 	 */
 	setRange:function(range){
-		var oldRange = [this.range[0].getTime(),this.range[0].getTime()];
-        if(!(range[0] instanceof Date))range[0]=OpenLayers.Date.parse(range[0]);
-		if(!(range[1] instanceof Date))range[1]=OpenLayers.Date.parse(range[1]);
+        var oldRange = [this.range[0].getTime(),this.range[0].getTime()];
+        for(var i=0;i<2;i++){
+            if(!range[i]){
+                //go ahead and make this a dummy date since so many functions expect this to be a date
+                range[i]=new Date(-8e15)
+            }
+            if(!(range[0] instanceof Date))range[0]=OpenLayers.Date.parse(range[0]);
+        }
 		this.range=range;
 		//set current time to correct location if the timer isn't running yet.
 		if(!this.timer){this.currentTime = new Date(this.range[(this.step>0)?0:1].getTime())}
