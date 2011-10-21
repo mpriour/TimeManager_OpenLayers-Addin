@@ -378,7 +378,7 @@ OpenLayers.Control.TimeManager = OpenLayers.Class(OpenLayers.Control, {
 		if (this.currentTime > this.range[1] || this.currentTime<this.range[0]) {
 			//loop in looping mode
 			if (this.loop) {
-				this.timer && clearInterval(this.timer) && (this.timer=null);
+                this.clearTimer()
 				this.currentTime = (this.step>0)?new Date(this.range[0].getTime()):new Date(this.range[1].getTime());
                 this.lastTimeIndex=-1;
 				this.events.triggerEvent('reset',{'looped':true});
@@ -386,7 +386,7 @@ OpenLayers.Control.TimeManager = OpenLayers.Class(OpenLayers.Control, {
 			}
 			//stop in normal mode
 			else {
-				this.timer && clearInterval(this.timer) && (this.timer=null);
+				this.clearTimer()
 				this.events.triggerEvent('stop', {'rangeExceeded': true});
 			}
 		}
@@ -414,7 +414,7 @@ OpenLayers.Control.TimeManager = OpenLayers.Class(OpenLayers.Control, {
 	 */
 	play:function(){
 		//ensure that we don't have multiple timers running
-		this.timer && clearInterval(this.timer) && (this.timer=null);
+        this.clearTimer();
 		//start playing
 		if (this.events.triggerEvent('play') !== false) {
             this.tick();
@@ -426,7 +426,7 @@ OpenLayers.Control.TimeManager = OpenLayers.Class(OpenLayers.Control, {
 	 * Stops the time-series animation. Fires the 'stop' event.
 	 */
 	stop:function(){
-		this.timer && clearInterval(this.timer) && (this.timer=null);
+		this.clearTimer();
 		this.events.triggerEvent('stop',{'rangeExceeded':false});
 	},
 	/**
@@ -516,7 +516,7 @@ OpenLayers.Control.TimeManager = OpenLayers.Class(OpenLayers.Control, {
 	 * {Date} the control's currentTime, which is also the control's start time
 	 */
 	reset:function(){
-		this.timer && clearInterval(this.timer);
+	    this.clearTimer();
 		this.currentTime = new Date(this.range[(this.step>0)?0:1].getTime());
 		this.events.triggerEvent('reset',{'looped':false});
         this.events.triggerEvent('tick',{'currentTime':this.currentTime});
@@ -751,6 +751,12 @@ OpenLayers.Control.TimeManager = OpenLayers.Class(OpenLayers.Control, {
             if (!canTick) break;
         }
         return canTick;
+    },
+    clearTimer: function(){
+        if(this.timer){
+            clearInterval(this.timer);
+            this.timer=null;
+        }
     },
 	CLASS_NAME:'OpenLayers.Control.TimeManager'
 });
