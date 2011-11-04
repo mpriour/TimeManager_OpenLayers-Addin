@@ -31,25 +31,6 @@ OpenLayers.TimeAgent.WMS = OpenLayers.Class(OpenLayers.TimeAgent,{
      *         grainularity of the step unit) in the control time and an interval
 	 */
 	intervalMode:'nearest',
-
-    /**
-     * APIProperty: rangeMode
-     * {String} This property will control if and how the animation time is
-     *     translated into a time range to display on each tick
-     *     Must be one of:
-     *      false - set to false to only use single value time parameters (Default)
-     *      "range" - use a value range for time
-     *      "cumulative" - use a range from the start time to the current time
-     */    
-    rangeMode:false,
-    
-    /**
-     * APIProperty: rangeInterval
-     * {Number} Number of units to add or subtract of the current time to build
-     *      a time range to display with each tick. 
-     *      ONLY used if intervalMode is 'range'
-     */
-    rangeInterval:null,
 	
 	/**
      * Constructor: OpenLayers.Control.TimeManager.WMS

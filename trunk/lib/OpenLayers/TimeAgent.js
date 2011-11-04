@@ -18,7 +18,7 @@
  */
 OpenLayers.TimeAgent = OpenLayers.Class({
 	/**
-	 * Property: timeManager
+	 * APIProperty: timeManager
 	 * {<OpenLayers.Control.TimeManager>}
 	 */
 	timeManager:null,
@@ -42,6 +42,23 @@ OpenLayers.TimeAgent = OpenLayers.Class({
      * {Array(<OpenLayers.Layer>)}
      */
     layers:null,
+    /**
+     * APIProperty: rangeMode
+     * {String} This property will control if and how the animation time is
+     *     translated into a time range to display on each tick
+     *     Must be one of:
+     *      false - set to false to only use single value time parameters (Default)
+     *      "range" - use a value range for time
+     *      "cumulative" - use a range from the start time to the current time
+     */    
+    rangeMode:false,
+    /**
+     * APIProperty: rangeInterval
+     * {Number} Number of units to add or subtract of the current time to build
+     *      a time range to display with each tick. 
+     *      ONLY used if intervalMode is 'range'
+     */
+    rangeInterval:null,
 	/**
      * Constructor: OpenLayers.Control.TimeManager
      * Create a new time manager control for temporal layers.
@@ -58,8 +75,8 @@ OpenLayers.TimeAgent = OpenLayers.Class({
         }
         if (this.layers) {
             var timeConfig = this.buildRangeAndIntervals(this.layers);
-            this.range = timeConfig.range,
-            this.intervals = timeConfig.intervals,
+            this.range = timeConfig.range;
+            this.intervals = timeConfig.intervals;
             this.timeSpans = timeConfig.timeSpans;
         }
 	},
@@ -80,8 +97,8 @@ OpenLayers.TimeAgent = OpenLayers.Class({
         }
         else {
             var timeConfig = this.buildRangeAndIntervals(this.layers);
-            this.range = timeConfig.range,
-            this.intervals = timeConfig.intervals,
+            this.range = timeConfig.range;
+            this.intervals = timeConfig.intervals;
             this.timeSpans = timeConfig.timeSpans;
         }
     },
@@ -98,8 +115,8 @@ OpenLayers.TimeAgent = OpenLayers.Class({
         the range & intervals*/
        if(this.intervals || timeInterval[0].getTime() == this.range[0].getTime() || timeInterval[1].getTime() == this.range[1].getTime()){
            var timeConfig = this.buildRangeAndIntervals(this.layers);
-           this.range = timeConfig.range,
-           this.intervals = timeConfig.intervals,
+           this.range = timeConfig.range;
+           this.intervals = timeConfig.intervals;
            this.timeSpans = timeConfig.timeSpans;
        }
     },
