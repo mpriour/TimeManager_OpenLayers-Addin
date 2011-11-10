@@ -439,13 +439,13 @@ OpenLayers.Control.TimeManager = OpenLayers.Class(OpenLayers.Control, {
 	 *     or ISO 8601 formatted strings
 	 */
 	setRange:function(range){
-        var oldRange = [this.range[0].getTime(),this.range[0].getTime()];
+        var oldRange = [this.range[0].getTime(),this.range[1].getTime()];
         for(var i=0;i<2;i++){
             if(!range[i]){
                 //go ahead and make this a dummy date since so many functions expect this to be a date
                 range[i]=new Date(-8e15)
             }
-            if(!(range[0] instanceof Date))range[0]=OpenLayers.Date.parse(range[0]);
+            if(!(range[i] instanceof Date))range[i]=OpenLayers.Date.parse(range[i]);
         }
 		this.range=range;
 		//set current time to correct location if the timer isn't running yet.
@@ -468,7 +468,9 @@ OpenLayers.Control.TimeManager = OpenLayers.Class(OpenLayers.Control, {
 		if(!(time instanceof Date))time=OpenLayers.Date.parse(time);
 		this.range[(this.step>0)?0:1]=time;
 		//set current time to this start time if we haven't already started
-		!this.timer && (this.currentTime=new Date(time.getTime()));
+		if (!this.timer) {
+            this.currentTime = new Date(time.getTime());
+        }
         this.events.triggerEvent("rangemodified");
 	},
 	/**
