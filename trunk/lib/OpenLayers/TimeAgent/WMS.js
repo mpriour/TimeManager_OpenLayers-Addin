@@ -101,7 +101,9 @@ OpenLayers.TimeAgent.WMS = OpenLayers.Class(OpenLayers.TimeAgent,{
         if(this.rangeMode && layer.metadata.allowRange!==false){
             if(this.rangeMode=='range'){
                 minTime = new Date(time.getTime())
-                minTime['setUTC'+this.timeManager.units](time['getUTC'+this.timeManager.units]()+this.rangeInterval);
+                if(this.timeManager.units){
+                    minTime['setUTC'+this.timeManager.units](time['getUTC'+this.timeManager.units]()-this.rangeInterval);    
+                }
             }else{
                 minTime = this.range[0]
             }
