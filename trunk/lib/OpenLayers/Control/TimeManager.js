@@ -258,56 +258,61 @@ OpenLayers.Control.TimeManager = OpenLayers.Class(OpenLayers.Control, {
     onAddLayer: function(evt){
         var lyr = evt.layer;
         if(lyr.dimensions && lyr.dimensions.time){
-            lyr.metadata.timeInterval = this.timeExtentsToIntervals(lyr.dimensions.time.values)
+            lyr.metadata.timeInterval = this.timeExtentsToIntervals(lyr.dimensions.time.values);
         }
-        var added=false;
-        if (lyr.metadata.timeInterval && !this.fixedLayers) {
-            this.timeAgents || (this.timeAgents = [])
-            var agentClass = lyr.CLASS_NAME.match(/\.Layer\.(\w+)/)[1]
-            if (agentClass in OpenLayers.TimeAgent) {
-                for (var i = 0, len = this.timeAgents.length; i < len; i++) {
-                    if (!lyr.timeAgent && this.timeAgents[i] instanceof OpenLayers.TimeAgent[agentClass]) {
-                        this.timeAgents[i].addLayer(lyr);
+        //don't do anything if layer is non-temporal
+        if (!lyr.metadata.timeInterval) {
+            return;
+        }
+        else {
+            var added = false;
+            if (lyr.metadata.timeInterval && !this.fixedLayers) {
+                this.timeAgents || (this.timeAgents = []);
+                var agentClass = lyr.CLASS_NAME.match(/\.Layer\.(\w+)/)[1];
+                if (agentClass in OpenLayers.TimeAgent) {
+                    for (var i = 0, len = this.timeAgents.length; i < len; i++) {
+                        if (!lyr.timeAgent && this.timeAgents[i] instanceof OpenLayers.TimeAgent[agentClass]) {
+                            this.timeAgents[i].addLayer(lyr);
+                            added = true;
+                            break;
+                        }
+                    }
+                }
+                if (!added) {
+                    var agents = this.buildTimeAgents([lyr]);
+                    if (agents) {
+                        this.timeAgents.push(agents[0]);
                         added = true;
-                        break;
                     }
                 }
-            }
-            if (!added) {
-                var agents = this.buildTimeAgents([lyr]);
-                if (agents) {
-                    this.timeAgents.push(agents[0])
-                    added = true;
-                }
-            }
-            //check if layer could be used in a time agent & if so modify the
-            //control range & interval as needed. time agent will convert timeInterval
-            //values to real dates
-            if(added){
-                var lyrIntervals = lyr.metadata.timeInterval;
-                if (lyrIntervals.length && lyrIntervals[0] instanceof Date && !this.fixedIntervals) {
-                    this.intervals || (this.intervals = []);
-                    var oldIntervalsLen = this.intervals.length,
-                    oldRange=[this.range[0]||new Date(1),this.range[1]||new Date(1)]
-                    this.intervals = this.getUniqueDates(this.intervals.concat(lyrIntervals));
-                    this.timeSpans = this.getValidTimeSpans();
-                    //adjust range as needed
-                    if(!this.range){
-                        this.setRange([this.intervals[0],this.intervals[this.intervals.length-1]])
+                //check if layer could be used in a time agent & if so modify the
+                //control range & interval as needed. time agent will convert timeInterval
+                //values to real dates
+                if (added) {
+                    var lyrIntervals = lyr.metadata.timeInterval;
+                    if (lyrIntervals.length && lyrIntervals[0] instanceof Date && !this.fixedIntervals) {
+                        this.intervals || (this.intervals = []);
+                        var oldIntervalsLen = this.intervals.length, oldRange = [this.range[0] || new Date(1), this.range[1] || new Date(1)];
+                        this.intervals = this.getUniqueDates(this.intervals.concat(lyrIntervals));
+                        this.timeSpans = this.getValidTimeSpans();
+                        //adjust range as needed
+                        if (!this.range) {
+                            this.setRange([this.intervals[0], this.intervals[this.intervals.length - 1]]);
+                        }
+                        else if (this.intervals[0] < this.range[0] || this.intervals[1] > this.range[1]) {
+                            this.setRange([Math.min(this.intervals[0], this.range[0]), Math.max(this.intervals[1], this.range[1])]);
+                        }
+                        if (oldIntervalsLen != this.intervals.length || oldRange[0].getTime() != range[0].getTime() || oldRange[1].getTime() != range[1].getTime()) {
+                            this.events.triggerEvent('rangemodified');
+                        }
                     }
-                    else if(this.intervals[0]<this.range[0]||this.intervals[1]>this.range[1]){
-                        this.setRange([Math.min(this.intervals[0],this.range[0]),Math.max(this.intervals[1],this.range[1])])
-                    }
-                    if(oldIntervalsLen!=this.intervals.length || oldRange[0].getTime()!=range[0].getTime() || oldRange[1].getTime()!=range[1].getTime()){
-                        this.events.triggerEvent('rangemodified')
-                    }
-                }
-                else if(!this.fixedRange){
-                    if(!this.range){
-                        this.setRange([lyrIntervals.start,lyrIntervals.end]);
-                    }
-                    else if(lyrIntervals.start<this.range[0]||lyrIntervals.end>this.range[1]){
-                        this.setRange([Math.min(lyrIntervals.start,this.range[0]),Math.max(lyrIntervals.end,this.range[1])])
+                    else if (!this.fixedRange) {
+                        if (!this.range) {
+                            this.setRange([lyrIntervals.start, lyrIntervals.end]);
+                        }
+                        else if (lyrIntervals.start < this.range[0] || lyrIntervals.end > this.range[1]) {
+                            this.setRange([Math.min(lyrIntervals.start, this.range[0]), Math.max(lyrIntervals.end, this.range[1])]);
+                        }
                     }
                 }
             }
