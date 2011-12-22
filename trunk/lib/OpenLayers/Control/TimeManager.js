@@ -538,9 +538,10 @@ OpenLayers.Control.TimeManager = OpenLayers.Class(OpenLayers.Control, {
 	 * stepUnit - {<OpenLayers.TimeUnit>}
 	 */
 	incrementTime:function(step,stepUnit){
-		step = step || this.step;
-		stepUnit = stepUnit || this.units;
-		this.currentTime['setUTC'+stepUnit](this.currentTime['getUTC'+stepUnit]()+step);
+		var step = step || this.step;
+		var stepUnit = stepUnit || this.units;
+		var newTime = parseFloat(this.currentTime['getUTC'+stepUnit]())+parseFloat(step);
+        this.currentTime['setUTC'+stepUnit](newTime);
 	},
 	/**
 	 * Method: buildTimeAgents
