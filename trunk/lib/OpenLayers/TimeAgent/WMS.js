@@ -120,8 +120,11 @@ OpenLayers.TimeAgent.WMS = OpenLayers.Class(OpenLayers.TimeAgent,{
             else if (this.intervalMode == "lastValid") {
                 wmstime = intervals[testResults.before]
             }
-            else {
-                wmstime = time - intervals[testResults.before] > time - intervals[testResults.after] ? intervals[testResults.after] : intervals[testResults.before];
+            else if (time - intervals[testResults.before] > time - intervals[testResults.after]) {
+                wmstime = intervals[testResults.after];
+            }
+            else{
+            	wmstime = intervals[testResults.before];
             }
             isotime = OpenLayers.Date.toISOString(wmstime);
         }
@@ -130,6 +133,9 @@ OpenLayers.TimeAgent.WMS = OpenLayers.Class(OpenLayers.TimeAgent,{
             isotime = OpenLayers.Date.toISOString(time);
         }
         layer.mergeNewParams({time:isotime});
+        if(!layer.visiblity){ 
+        	layer.setVisibility(true);
+        }
 	},
     /**
      * 
