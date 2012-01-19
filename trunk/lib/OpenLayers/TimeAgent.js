@@ -126,25 +126,32 @@ OpenLayers.TimeAgent = OpenLayers.Class({
 			var timeInterval = (layers[i].metadata)?layers[i].metadata.timeInterval:null;
 			if (timeInterval) {
                 for (var j = 0; j < timeInterval.length; j++) {
-                    if(timeInterval[j] instanceof Array){
-                        var min = OpenLayers.Date.parse(timeInterval[j][0]),
-                        max = OpenLayers.Date.parse(timeInterval[j][1]),
-                        resolution = timeInterval[j][2] ? this.parseISOPeriod(timeInterval[j][2]) : null;
+                    var tinterval = timeInterval[j];
+                	if(tinterval instanceof Array){
+                        var min = OpenLayers.Date.parse(tinterval[0]),
+                        max = OpenLayers.Date.parse(tinterval[1]),
+                        resolution = tinterval[2] ? this.parseISOPeriod(tinterval[2]) : null;
                         var timeRangeObj = {
                             start: min,
                             end: max,
                             'resolution': (resolution) ? resolution : null
                         }
                         validTimes.push(timeRangeObj);
-                        timeInterval[j] = timeRangeObj;
+                        tinterval = timeRangeObj;
                         if (!range[0] || min < range[0]) {range[0] = min;}
                         if (!range[1] || max > range[1]) {range[1] = max;}
                     }
                     else{
-                        if (!(timeInterval[j] instanceof Date)) {
-                            timeInterval[j] = OpenLayers.Date.parse(timeInterval[j])
+                        if (typeof tinterval == "string") {
+                            tinterval = OpenLayers.Date.parse(tinterval)
                         }
-                        intervals.push(timeInterval[j])
+                        if(tinterval.start){
+                        	intervals.push(tinterval.start,tinterval.end);
+                        	validTimes.push(tinterval);
+                        }
+                        else{
+                        	intervals.push(tinterval)
+                        }
                     }
                 }
             }
