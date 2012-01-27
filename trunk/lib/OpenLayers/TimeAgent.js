@@ -92,8 +92,8 @@ OpenLayers.TimeAgent = OpenLayers.Class({
         this.layers = (!this.layers)?[layer]:this.layers.concat(layer);
         var timeInterval = layer.metadata.timeInterval;
         if (timeInterval.length == 2) {
-            if (timeInterval[0] < this.range[0]) {this.range[0] = new Date(timeInterval[0].getDate())}
-            if (timeInterval[1] > this.range[1]) {this.range[1] = new Date(timeInterval[1].getDate())}
+            if (timeInterval[0] < this.range[0]) {this.range[0] = new Date(timeInterval[0].getDate());}
+            if (timeInterval[1] > this.range[1]) {this.range[1] = new Date(timeInterval[1].getDate());}
         }
         else {
             var timeConfig = this.buildRangeAndIntervals(this.layers);
@@ -103,17 +103,25 @@ OpenLayers.TimeAgent = OpenLayers.Class({
         }
     },
     removeLayer:function(layer){
+        var timespan;
         for(var i=0,len=this.layers.length;i<len;i++){
             if(layer==this.layers[i]){
                 this.layers.splice(i,1);
+                timespan = this.timeSpans[i];
+                this.timeSpans.splice(i,1);
                 break;
             }
         }
-        var timeInterval = layer.metadata.timeInterval;
+        //var timeInterval = layer.metadata.timeInterval;
+        
+        /*this.timespans should follow the exact same order as the layer array
+        timespans are already properly processed into date parts, whereas the 
+        timeInterval is unpredictable*/
+        
         /*if we only had a range and this layer wasn't one of the end points
         then we don't need to do anything, otherwise we might as well rebuild
         the range & intervals*/
-       if(this.intervals || timeInterval[0].getTime() == this.range[0].getTime() || timeInterval[1].getTime() == this.range[1].getTime()){
+       if(this.intervals || timespan.start.getTime() == this.range[0].getTime() || timespan.end.getTime() == this.range[1].getTime()){
            var timeConfig = this.buildRangeAndIntervals(this.layers);
            this.range = timeConfig.range;
            this.intervals = timeConfig.intervals;

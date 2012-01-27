@@ -157,10 +157,12 @@ OpenLayers.Control.TimeManager = OpenLayers.Class(OpenLayers.Control, {
         if (this.intervals) {
             for (var i = 0, len = this.intervals.length; i < len; i++) {
                 var interval = this.intervals[i];
-                if (!(interval[i] instanceof Date)) this.intervals[i] = OpenLayers.Date.parse(interval);
+                if (!(interval[i] instanceof Date)) {
+                    this.intervals[i] = OpenLayers.Date.parse(interval);
+                }
             }
             this.intervals.sort(function(a, b){
-                return a - b
+                return a - b;
             });
             this.range = [this.intervals[0], this.intervals[this.intervals.length - 1]];
             this.fixedIntervals = true;
@@ -322,22 +324,10 @@ OpenLayers.Control.TimeManager = OpenLayers.Class(OpenLayers.Control, {
         var lyr = evt.layer;
         if(lyr.metadata.timeInterval){
             var lyrIntervals = lyr.metadata.timeInterval;
-            var lyrIndex = OpenLayers.Util.indexOf(this.layers,lyr);
-            //find the agent with the layer
-            for(var i=0, len = this.timeAgents.length;i<len;i++){
-                var agent = this.timeAgents[i];
-                if(OpenLayers.Util.indexOf(agent.layers,lyr)>-1){
-                    agent.removeLayer(lyr);
-                    this.layers.splice(lyrIndex,1);
-                    //if the agent doesn't handle any layers, get rid of it
-                    if(!agent.layers.length){
-                        this.timeAgents.splice(i,1);
-                        agent.destroy();
-                    }
-                    this.timeSpans = this.getValidTimeSpans();
-                    break;
-                }
-            }
+var lyrIndex = OpenLayers.Util.indexOf(this.layers,lyr);
+this.layers.splice(lyrIndex,1);
+            this.removeAgentLayer(lyr);
+
             if(lyrIntervals.length && lyrIntervals[0] instanceof Date && !this.fixedIntervals){
                 this.intervals = this.buildIntervals(this.timeAgents);
                 if (this.intervals) {
@@ -600,6 +590,25 @@ OpenLayers.Control.TimeManager = OpenLayers.Class(OpenLayers.Control, {
 		}
 		return (agents.length)?agents:null;
 	},
+	
+    removeAgentLayer: function(lyr) {
+        //find the agent with the layer
+        for(var i = 0, len = this.timeAgents.length; i < len; i++) {
+            var agent = this.timeAgents[i];
+            if(OpenLayers.Util.indexOf(agent.layers, lyr) > -1) {
+                agent.removeLayer(lyr);
+                //if the agent doesn't handle any layers, get rid of it
+                if(!agent.layers.length) {
+                    this.timeAgents.splice(i, 1);
+                    agent.destroy();
+                }
+                this.timeSpans = this.getValidTimeSpans();
+                break;
+            }
+        }
+
+    },
+
 	/**
 	 * Method: buildIntervals
 	 * Builds an array of distinct date/times that the time agents are
