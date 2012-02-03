@@ -5,6 +5,9 @@
 
 
 /**
+ * @requires OpenLayers/BaseTypes.js
+ * @requires OpenLayers/BaseTypes/Class.js
+ * @requires OpenLayers/BaseTypes/Date.js
  * @requires OpenLayers/TimeAgent.js
  */
 

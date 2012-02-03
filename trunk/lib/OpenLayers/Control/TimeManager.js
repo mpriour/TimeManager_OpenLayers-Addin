@@ -4,6 +4,16 @@
  * full text of the license. */
 
 /**
+ * @requires OpenLayers/BaseTypes.js
+ * @requires OpenLayers/BaseTypes/Class.js
+ * @requires OpenLayers/BaseTypes/Date.js
+ * @requires OpenLayers/Control.js
+ * @requires OpenLayers/TimeAgent.js
+ * @requires OpenLayers/TimeAgent/WMS.js
+ * @requires OpenLayers/Util.js
+ */
+
+/**
  * Class: OpenLayers.Control.TimeManager
  * Control to display and animate map layers across time.
  *

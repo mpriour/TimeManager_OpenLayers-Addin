@@ -5,7 +5,11 @@
 
 
 /**
+ * @requires OpenLayers/BaseTypes/Class.js
+ * @requires OpenLayers/BaseTypes/Date.js
  * @requires OpenLayers/Control/TimeManager.js
+ * @requires OpenLayers/Util.js
+ * @requires OpenLayers/Events.js
  */
 
 /**
