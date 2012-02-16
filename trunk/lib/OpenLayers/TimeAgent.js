@@ -5,11 +5,7 @@
 
 
 /**
- * @requires OpenLayers/BaseTypes/Class.js
- * @requires OpenLayers/BaseTypes/Date.js
  * @requires OpenLayers/Control/TimeManager.js
- * @requires OpenLayers/Util.js
- * @requires OpenLayers/Events.js
  */
 
 /**
@@ -149,6 +145,10 @@ OpenLayers.TimeAgent = OpenLayers.Class({
         var range = [], intervals = [], validTimes = [];
         for(var i = 0, len = layers.length; i < len; i++) {
             var timeInterval = (layers[i].metadata) ? layers[i].metadata.timeInterval : null;
+            if(!timeInterval && layers[i].dimensions && layers[i].dimensions.time) {
+                layers[i].metadata.timeInterval = OpenLayers.Control.TimeManager.prototype.timeExtentsToIntervals.call(null, layers[i].dimensions.time.values);
+                timeInterval = layers[i].metadata.timeInterval;
+            }
             if(timeInterval) {
                 for(var j = 0; j < timeInterval.length; j++) {
                     var tinterval = timeInterval[j];
