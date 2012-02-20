@@ -3,16 +3,6 @@
  * See http://svn.openlayers.org/trunk/openlayers/license.txt for the
  * full text of the license. */
 
-/** 
- * @requires OpenLayers/BaseTypes.js
- * @requires OpenLayers/BaseTypes/Class.js
- * @requires OpenLayers/BaseTypes/Date.js
- * @requires OpenLayers/Control.js
- * @requires OpenLayers/TimeAgent.js
- * @requires OpenLayers/TimeAgent/WMS.js
- * @requires OpenLayers/Util.js
- */
-
 /**
  * Class: OpenLayers.Control.TimeManager
  * Control to display and animate map layers across time.
@@ -220,7 +210,7 @@ OpenLayers.Control.TimeManager = OpenLayers.Class(OpenLayers.Control, {
                     }
                 }
                 else {
-                    console.warn("Attempting to play a time manager control without any temporally active layers");
+                    //console.warn("Attempting to play a time manager control without any temporally active layers");
                     return false;
                 }
             },
@@ -433,7 +423,7 @@ OpenLayers.Control.TimeManager = OpenLayers.Class(OpenLayers.Control, {
                 intervalId = setInterval(OpenLayers.Function.bind(function() {
                     var doTick = this.canTickCheck() || checkCount++ >= maxDelays;
                     if(checkCount > maxDelays) {
-                        console.debug('ADVANCED DUE TO TIME LIMIT');
+                        //console.debug('ADVANCED DUE TO TIME LIMIT');
                     }
                     if(doTick) {
                         clearInterval(intervalId);

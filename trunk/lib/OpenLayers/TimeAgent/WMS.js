@@ -84,7 +84,7 @@ OpenLayers.TimeAgent.WMS = OpenLayers.Class(OpenLayers.TimeAgent, {
 
     onTick : function(evt) {
         this.currentTime = evt.currentTime || this.timeManager.currentTime;
-        console.debug('CurrentTime:' + this.currentTime.toString());
+        //console.debug('CurrentTime:' + this.currentTime.toString());
         var inrange = this.currentTime <= this.range[1] && this.currentTime >= this.range[0];
         if(inrange) {
             this.loadQueue = OpenLayers.Array.filter(this.layers, function(lyr) {
@@ -92,7 +92,7 @@ OpenLayers.TimeAgent.WMS = OpenLayers.Class(OpenLayers.TimeAgent, {
             }).length;
             
             this.canTick = !this.loadQueue;
-            console.debug('canTick:FALSE\nQueueCount:' + this.loadQueue);
+            //console.debug('canTick:FALSE\nQueueCount:' + this.loadQueue);
         }
         for(var i = 0, len = this.layers.length; i < len; i++) {
             if(inrange) {
@@ -185,15 +185,11 @@ OpenLayers.TimeAgent.WMS = OpenLayers.Class(OpenLayers.TimeAgent, {
 
     onLayerLoadEnd : function() {
         this.loadQueue--;
-        console.debug('QueueCount:' + this.loadQueue);
+        //console.debug('QueueCount:' + this.loadQueue);
         if(this.loadQueue <= 0) {
             this.canTick = true;
-            console.debug('canTick:TRUE');
+            //console.debug('canTick:TRUE');
         }
-    },
-
-    onLayerLoadStart : function() {
-        //this.loadQueue=(!this.loadQueue && this.loadQueue!==0)?0:this.loadQueue++
     },
 
     CLASS_NAME : 'OpenLayers.TimeAgent.WMS'
