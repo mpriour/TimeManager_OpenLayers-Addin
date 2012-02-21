@@ -552,6 +552,7 @@ OpenLayers.Control.TimeManager = OpenLayers.Class(OpenLayers.Control, {
      */ reset:function() {
         this.clearTimer();
         this.currentTime = new Date(this.range[(this.step > 0) ? 0 : 1].getTime());
+        this.lastTimeIndex = (this.step>0) ? 0 : this.intervals.length - 1;
         this.events.triggerEvent('reset', {
             'looped' : false
         });
