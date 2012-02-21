@@ -5,11 +5,7 @@
 
 
 /**
- * @requires OpenLayers/BaseTypes/Class.js
- * @requires OpenLayers/BaseTypes/Date.js
  * @requires OpenLayers/Control/TimeManager.js
- * @requires OpenLayers/Util.js
- * @requires OpenLayers/Events.js
  */
 
 /**
@@ -81,7 +77,7 @@ OpenLayers.TimeAgent = OpenLayers.Class({
             this.events.on(this.eventListeners);
         }
 
-        if(this.layers) {
+        if(this.layers && this.layers.length) {
             var timeConfig = this.buildRangeAndIntervals(this.layers);
             this.range = timeConfig.range;
             this.intervals = timeConfig.intervals;
@@ -188,7 +184,7 @@ OpenLayers.TimeAgent = OpenLayers.Class({
             }
         }
         if(intervals.length) {
-            intervals = this.timeManager.getUniqueDates(intervals);
+            intervals = OpenLayers.Control.TimeManager.prototype.getUniqueDates.call(this,intervals);
             var last = intervals.length - 1;
             if(!range[0] || intervals[0] < range[0]) {
                 range[0] = intervals[0];

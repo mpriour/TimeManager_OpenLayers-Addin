@@ -241,24 +241,27 @@ OpenLayers.Control.TimeManager = OpenLayers.Class(OpenLayers.Control, {
         OpenLayers.Control.prototype.setMap.call(this, map);
         //if the control was not directly intialized with specific layers, then
         //get layers from map and build appropiate time agents
-        if(!this.timeAgents) {
-            for(var i = 0, len = map.layers.length; i < len; i++) {
-                var lyr = map.layers[i];
-                if(lyr.dimensions && lyr.dimensions.time) {!lyr.metadata && (lyr.metadata = {});
-                    lyr.metadata.timeInterval = this.timeExtentsToIntervals(lyr.dimensions.time.values);
-                }
-                if((lyr.dimensions && lyr.dimensions.time) || (lyr.metadata.timeInterval && lyr.metadata.timeInterval.length)) {
-                    if(!this.layers) {
-                        this.layers = [];
-                    }
-                    this.layers.push(lyr);
-                }
-            }
-            this.timeAgents = this.buildTimeAgents(this.layers);
-            this.timeSpans = this.getValidTimeSpans();
+        var layers = this.layers || map.layers;
+        if(layers){
+            this.layers = [];
         }
+        for(var i = 0, len = layers.length; i < len; i++) {
+            var lyr = layers[i];
+            if(lyr.dimensions && lyr.dimensions.time) {!lyr.metadata && (lyr.metadata = {});
+                lyr.metadata.timeInterval = this.timeExtentsToIntervals(lyr.dimensions.time.values);
+            }
+            if((lyr.dimensions && lyr.dimensions.time) || (lyr.metadata.timeInterval && lyr.metadata.timeInterval.length)) {
+                this.layers.push(lyr);
+            }
+        }            
+        
+        if(!this.timeAgents) {
+            this.timeAgents = this.buildTimeAgents(this.layers);
+        }
+        this.timeSpans = this.getValidTimeSpans();
+
         //if no interval was specified & interval !== false, get from timeAgents
-        if(!this.intevals && this.intervals !== false) {
+        if(!this.intervals && this.intervals !== false) {
             this.intervals = this.buildIntervals(this.timeAgents);
         }
         //if no range was specified then get from timeAgents
