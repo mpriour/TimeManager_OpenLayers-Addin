@@ -190,6 +190,7 @@ OpenLayers.Control.TimeManager = OpenLayers.Class(OpenLayers.Control, {
         else if(this.timeAgents){
             for(var i=0,len=this.timeAgents.length;i<len;i++){
                 var agent = this.timeAgents[i];
+                agent.timeManager = this;
                 this.events.on({
                     'tick' : agent.onTick,
                     scope : agent
@@ -607,7 +608,7 @@ OpenLayers.Control.TimeManager = OpenLayers.Class(OpenLayers.Control, {
                 }
                 this.events.on({
                     tick : agent.onTick,
-                    scope : this
+                    scope : agent
                 });
                 agents.push(agent);
             }

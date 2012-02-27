@@ -87,7 +87,7 @@ OpenLayers.TimeAgent = OpenLayers.Class({
 
     destroy : function() {
         this.events.destroy();
-        this.timeManager.events.unregister('tick', this.timeManager, this.onTick);
+        this.timeManager.events.unregister('tick', this, this.onTick);
         this.timeManager = this.layers = this.range = this.intervals = null;
     },
 
@@ -119,26 +119,29 @@ OpenLayers.TimeAgent = OpenLayers.Class({
         for(var i = 0, len = this.layers.length; i < len; i++) {
             if(layer == this.layers[i]) {
                 this.layers.splice(i, 1);
-                timespan = this.timeSpans[i];
-                this.timeSpans.splice(i, 1);
+                if(this.timeSpans){
+                    timespan = this.timeSpans[i];
+                    this.timeSpans.splice(i, 1);
+                }
                 break;
             }
         }
-        //var timeInterval = layer.metadata.timeInterval;
 
-        /*this.timespans should follow the exact same order as the layer array
-         timespans are already properly processed into date parts, whereas the
-         timeInterval is unpredictable*/
-
-        /*if we only had a range and this layer wasn't one of the end points
-         then we don't need to do anything, otherwise we might as well rebuild
-         the range & intervals*/
-        if(this.intervals || timespan.start.getTime() == this.range[0].getTime() || timespan.end.getTime() == this.range[1].getTime()) {
-            var timeConfig = this.buildRangeAndIntervals(this.layers);
-            this.range = timeConfig.range;
-            this.intervals = timeConfig.intervals;
-            this.timeSpans = timeConfig.timeSpans;
-        }
+            //var timeInterval = layer.metadata.timeInterval;
+    
+            /*this.timespans should follow the exact same order as the layer array
+             timespans are already properly processed into date parts, whereas the
+             timeInterval is unpredictable*/
+    
+            /*if we only had a range and this layer wasn't one of the end points
+             then we don't need to do anything, otherwise we might as well rebuild
+             the range & intervals*/
+            if(this.intervals || timespan.start.getTime() == this.range[0].getTime() || timespan.end.getTime() == this.range[1].getTime()) {
+                var timeConfig = this.buildRangeAndIntervals(this.layers);
+                this.range = timeConfig.range;
+                this.intervals = timeConfig.intervals;
+                this.timeSpans = timeConfig.timeSpans;
+            }
     },
 
     buildRangeAndIntervals : function(layers) {
