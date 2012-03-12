@@ -545,6 +545,20 @@ OpenLayers.Control.TimeManager = OpenLayers.Class(OpenLayers.Control, {
         });
     },
     /**
+     * APIMethod:setFrameRate
+     * Sets the control's playback frameRate (ticks/second)
+     * Parameters: {Number} rate - the ticks/second rate
+     */
+    setFrameRate: function(rate){
+        var playing = !!this.timer;
+        this.clearTimer();
+        this.frameRate = rate;
+        if(playing){
+            //this.tick();
+            this.timer = setInterval(OpenLayers.Function.bind(this.tick, this), 1000 / this.frameRate);
+        }
+    },
+    /**
      * APIMethod:reset
      * Resets the time to the animation start time. Fires the 'reset' event.
      *
