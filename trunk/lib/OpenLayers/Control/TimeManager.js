@@ -273,6 +273,16 @@ OpenLayers.Control.TimeManager = OpenLayers.Class(OpenLayers.Control, {
             }
         }
         if(this.range || this.intervals) {
+            //handle when the current time is at the range endpoint and not the same as the interval endpoints
+            if(this.range && this.intervals){
+                var rIndex = (this.step>0) ? 0 : 1;
+                var inIndex = (this.step>0) ? 0 : this.intervals.length-1;
+                if(this.range[rIndex] > this.intervals[inIndex] || this.range[rIndex] < this.intervals[inIndex]){
+                    if(this.currentTime.getTime() == this.range[rIndex].getTime()){
+                        this.setTime(this.currentTime);
+                    }
+                }
+            }
             this.events.triggerEvent('rangemodified');
         }
         //set map agents for layer additions and removal
@@ -339,6 +349,16 @@ OpenLayers.Control.TimeManager = OpenLayers.Class(OpenLayers.Control, {
                         }
                         else if(lyrIntervals.start < this.range[0] || lyrIntervals.end > this.range[1]) {
                             this.setRange([Math.min(lyrIntervals.start, this.range[0]), Math.max(lyrIntervals.end, this.range[1])]);
+                        }
+                    }
+                    //handle when the current time is at the range endpoint and not the same as the interval endpoints
+                    if(this.range && this.intervals){
+                        var rIndex = (this.step>0) ? 0 : 1;
+                        var inIndex = (this.step>0) ? 0 : this.intervals.length-1;
+                        if(this.range[rIndex] > this.intervals[inIndex] || this.range[rIndex] < this.intervals[inIndex]){
+                            if(this.currentTime.getTime() == this.range[rIndex].getTime()){
+                                this.setTime(this.currentTime);
+                            }
                         }
                     }
                 }
