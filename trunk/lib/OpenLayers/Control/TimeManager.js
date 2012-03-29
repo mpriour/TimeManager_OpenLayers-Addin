@@ -420,7 +420,8 @@ OpenLayers.Control.TimeManager = OpenLayers.Class(OpenLayers.Control, {
             //loop in looping mode
             if(this.loop) {
                 this.clearTimer();
-                this.currentTime = (this.step > 0) ? new Date(this.range[0].getTime()) : new Date(this.range[1].getTime());
+                var newTime = (this.step > 0) ? new Date(this.range[0].getTime()) : new Date(this.range[1].getTime());
+                this.setTime(newTime);
                 this.lastTimeIndex = -1;
                 this.events.triggerEvent('reset', {
                     'looped' : true
@@ -436,7 +437,6 @@ OpenLayers.Control.TimeManager = OpenLayers.Class(OpenLayers.Control, {
             }
         }
         else {
-
             if(this.canTickCheck()) {
                 this.events.triggerEvent('tick', {
                     currentTime : this.currentTime
@@ -489,22 +489,27 @@ OpenLayers.Control.TimeManager = OpenLayers.Class(OpenLayers.Control, {
 	 * range - {Arrray(Date|String)} UTC time range using either Date objects
 	 *     or ISO 8601 formatted strings
 	 */
-	setRange:function(range){
-        var oldRange = [this.range[0].getTime(),this.range[1].getTime()];
-        for(var i=0;i<2;i++){
-            if(!range[i]){
+    setRange:function(range) {
+        var oldRange = [this.range[0].getTime(), this.range[1].getTime()];
+        for(var i = 0; i < 2; i++) {
+            if(!range[i]) {
                 //go ahead and make this a dummy date since so many functions expect this to be a date
                 range[i]=new Date(-8e15);
             }
-            if(!(range[i] instanceof Date)){range[i]=OpenLayers.Date.parse(range[i]);}
+            if(!(range[i] instanceof Date)) {
+                range[i] = OpenLayers.Date.parse(range[i]);
+            }
         }
-		this.range=range;
-		//set current time to correct location if the timer isn't running yet.
-		if(!this.timer){this.currentTime = new Date(this.range[(this.step>0)?0:1].getTime());}
-        if(this.range[0].getTime()!=oldRange[0]||this.range[1].getTime()!=oldRange[1]){
+        this.range = range;
+        //set current time to correct location if the timer isn't running yet.
+        if(!this.timer) {
+            var newTime = new Date(this.range[(this.step > 0) ? 0 : 1].getTime());
+            this.setTime(newTime);
+        }
+        if(this.range[0].getTime() != oldRange[0] || this.range[1].getTime() != oldRange[1]) {
             this.events.triggerEvent("rangemodified");
         }
-	},
+    },
 	/**
 	 * APIMethod:setStart
 	 * Sets the start time for an animation. If the step is negative then this
@@ -516,13 +521,11 @@ OpenLayers.Control.TimeManager = OpenLayers.Class(OpenLayers.Control, {
 	 *     ISO 8601 formatted string.
 	 */
 	setStart:function(time){
-		if(!(time instanceof Date)){time=OpenLayers.Date.parse(time);}
-		this.range[(this.step>0)?0:1]=time;
-		//set current time to this start time if we haven't already started
-		if (!this.timer) {
-            this.currentTime = new Date(time.getTime());
+        if(this.step>0){
+            this.setRange([time,this.range[1]]);
+        } else {
+            this.setRange([this.range[0],time]);
         }
-        this.events.triggerEvent("rangemodified");
 	},
 	/**
 	 * APIMethod:setEnd
@@ -535,9 +538,11 @@ OpenLayers.Control.TimeManager = OpenLayers.Class(OpenLayers.Control, {
 	 *     ISO 8601 formatted string.
 	 */	
 	setEnd:function(time){
-		if(!(time instanceof Date)){time=OpenLayers.Date.parse(time);}
-		this.range[(this.step>0)?1:0]=time;
-        this.events.triggerEvent("rangemodified");
+        if(this.step>0){
+            this.setRange([this.range[0],time]);
+        } else {
+            this.setRange([time,this.range[1]]);
+        }
 	},
     /**
      * APIMethod:setTime
@@ -586,7 +591,8 @@ OpenLayers.Control.TimeManager = OpenLayers.Class(OpenLayers.Control, {
      * {Date} the control's currentTime, which is also the control's start time
      */ reset:function() {
         this.clearTimer();
-        this.currentTime = new Date(this.range[(this.step > 0) ? 0 : 1].getTime());
+        var newTime = new Date(this.range[(this.step > 0) ? 0 : 1].getTime());
+        this.setTime(newTime);
         this.lastTimeIndex = (this.step>0) ? 0 : this.intervals.length - 1;
         this.events.triggerEvent('reset', {
             'looped' : false
