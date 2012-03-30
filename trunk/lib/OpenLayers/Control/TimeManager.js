@@ -422,7 +422,6 @@ OpenLayers.Control.TimeManager = OpenLayers.Class(OpenLayers.Control, {
                 this.clearTimer();
                 var newTime = (this.step > 0) ? new Date(this.range[0].getTime()) : new Date(this.range[1].getTime());
                 this.setTime(newTime);
-                this.lastTimeIndex = -1;
                 this.events.triggerEvent('reset', {
                     'looped' : true
                 });
@@ -593,7 +592,6 @@ OpenLayers.Control.TimeManager = OpenLayers.Class(OpenLayers.Control, {
         this.clearTimer();
         var newTime = new Date(this.range[(this.step > 0) ? 0 : 1].getTime());
         this.setTime(newTime);
-        this.lastTimeIndex = (this.step>0) ? 0 : this.intervals.length - 1;
         this.events.triggerEvent('reset', {
             'looped' : false
         });
