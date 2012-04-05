@@ -597,9 +597,6 @@ OpenLayers.Control.TimeManager = OpenLayers.Class(OpenLayers.Control, {
         this.events.triggerEvent('reset', {
             'looped' : !!looped
         });
-        this.events.triggerEvent('tick', {
-            'currentTime' : this.currentTime
-        });
         return this.currentTime;
     },
     /**
@@ -609,14 +606,15 @@ OpenLayers.Control.TimeManager = OpenLayers.Class(OpenLayers.Control, {
      * Parameters:
      * step - {Number}
      * stepUnit - {<OpenLayers.TimeUnit>}
-     */ incrementTime:function(step,stepUnit) {
+     */ 
+     incrementTime:function(step,stepUnit) {
         var step = step || this.step;
         var stepUnit = stepUnit || this.units;
         var newTime = parseFloat(this.currentTime['getUTC'+stepUnit]()) + parseFloat(step);
         this.currentTime['setUTC'+stepUnit](newTime);
     },
 
-	    /**
+	/**
 	 * Method: buildTimeAgents
 	 * Creates the controls "managed" by this control.
 	 * 
