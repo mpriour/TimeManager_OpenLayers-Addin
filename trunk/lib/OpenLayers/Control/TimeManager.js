@@ -421,11 +421,7 @@ OpenLayers.Control.TimeManager = OpenLayers.Class(OpenLayers.Control, {
             //loop in looping mode
             if(this.loop) {
                 this.clearTimer();
-                var newTime = (this.step > 0) ? new Date(this.range[0].getTime()) : new Date(this.range[1].getTime());
-                this.setTime(newTime);
-                this.events.triggerEvent('reset', {
-                    'looped' : true
-                });
+                this.reset(true);
                 this.play();
             }
             //stop in normal mode
@@ -553,7 +549,8 @@ OpenLayers.Control.TimeManager = OpenLayers.Class(OpenLayers.Control, {
      * Parameters: {Object} time
      * time - {Date|String} UTC current animantion time/date using either a
      *     Date object or ISO 8601 formatted string.
-     */ setTime:function(time) {
+     */ 
+     setTime:function(time) {
         if(!( time instanceof Date)) {
             time = OpenLayers.Date.parse(time);
         }
@@ -588,15 +585,17 @@ OpenLayers.Control.TimeManager = OpenLayers.Class(OpenLayers.Control, {
     /**
      * APIMethod:reset
      * Resets the time to the animation start time. Fires the 'reset' event.
-     *
+     * 
+     * Parameters: {Boolean} looped - trigger reset event with looped = true
      * Returns:
      * {Date} the control's currentTime, which is also the control's start time
-     */ reset:function() {
+     */ 
+     reset:function(looped) {
         this.clearTimer();
         var newTime = new Date(this.range[(this.step > 0) ? 0 : 1].getTime());
         this.setTime(newTime);
         this.events.triggerEvent('reset', {
-            'looped' : false
+            'looped' : !!looped
         });
         this.events.triggerEvent('tick', {
             'currentTime' : this.currentTime
