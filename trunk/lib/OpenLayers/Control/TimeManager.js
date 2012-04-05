@@ -556,10 +556,22 @@ OpenLayers.Control.TimeManager = OpenLayers.Class(OpenLayers.Control, {
         }
         if(this.snapToIntervals) {
             var nearest = OpenLayers.TimeAgent.WMS.prototype.findNearestTimes.apply(this, [time, this.intervals]);
-            if(nearest.before > -1) {
-                this.currentTime = this.intervals[nearest.before];
-                this.lastTimeIndex = nearest.before;
+            var index = this.lastTimeIndex;
+            if(nearest.exact > -1){
+                index = nearest.exact;
+            } else if(nearest.before > -1 &&  nearest.after > -1) {
+                //requested time is somewhere between 2 valid times
+                //find the actual closest one.
+                var bdiff = this.intervals[nearest.before] - this.currentTime;
+                var adiff = this.currentTime - this.intervals[nearest.after];
+                index = (adiff > bdiff) ? nearest.before : nearest.after;
+            } else if (nearest.before > -1){
+                index = nearest.before;
+            } else if (nearest.after >-1){
+                index = nearest.after;
             }
+            this.currentTime = this.intervals[index];
+            this.lastTimeIndex = index;
         }
         else {
             this.currentTime = time;
