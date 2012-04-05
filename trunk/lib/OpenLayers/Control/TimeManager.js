@@ -400,7 +400,8 @@ OpenLayers.Control.TimeManager = OpenLayers.Class(OpenLayers.Control, {
      * Advance/reverse time one step forward/backward. Fires the 'tick' event
      * if time can be incremented without exceeding the time range.
      *
-     */ tick:function() {
+     */ 
+	 tick:function() {
         if(this.intervals && this.snapToIntervals) {
             var newIndex = this.lastTimeIndex + ((this.step > 0) ? 1 : -1);
             if(newIndex < this.intervals.length && newIndex > -1) {
@@ -462,12 +463,14 @@ OpenLayers.Control.TimeManager = OpenLayers.Class(OpenLayers.Control, {
      * APIMethod: play
      * Begins/resumes the time-series animation. Fires the 'play' event,
      * then calls 'tick' at the interval set by the frameRate property
-     */ play:function() {
+     */ 
+	 play:function() {
         //ensure that we don't have multiple timers running
         this.clearTimer();
         //start playing
         if(this.events.triggerEvent('play') !== false) {
             this.tick();
+            this.clearTimer(); //no seriously we really really only want 1 timer
             this.timer = setInterval(OpenLayers.Function.bind(this.tick, this), 1000 / this.frameRate);
         }
     },
