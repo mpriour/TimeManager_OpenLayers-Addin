@@ -268,9 +268,6 @@ OpenLayers.Control.TimeManager = OpenLayers.Class(OpenLayers.Control, {
         //if no range was specified then get from timeAgents
         if(!this.range) {
             this.range = this.buildRange(this.timeAgents);
-            if(this.range) {
-                this.currentTime = new Date(this.range[(this.step > 0) ? 0 : 1].getTime());
-            }
         }
         if(this.range || this.intervals) {
             //handle when the current time is at the range endpoint and not the same as the interval endpoints
@@ -284,6 +281,9 @@ OpenLayers.Control.TimeManager = OpenLayers.Class(OpenLayers.Control, {
                 }
             }
             this.events.triggerEvent('rangemodified');
+        }
+        if(this.range && !this.currentTime) {
+            this.currentTime = new Date(this.range[(this.step > 0) ? 0 : 1].getTime());
         }
         //set map agents for layer additions and removal
         this.map.events.on({
