@@ -156,7 +156,7 @@ OpenLayers.TimeAgent.WMS = OpenLayers.Class(OpenLayers.TimeAgent, {
      */
     findNearestTimes : function(testDate, dates) {
         var retObj = {
-            exact : false,
+            exact : -1,
             before : -1,
             after : -1
         };
