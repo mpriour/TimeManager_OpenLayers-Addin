@@ -86,20 +86,19 @@ OpenLayers.TimeAgent.WMS = OpenLayers.Class(OpenLayers.TimeAgent, {
         this.currentTime = evt.currentTime || this.timeManager.currentTime;
         //console.debug('CurrentTime:' + this.currentTime.toString());
         var inrange = this.currentTime <= this.range[1] && this.currentTime >= this.range[0];
+        //this is an inrange flag for all the entire time range of layers managed by
+        //this time agent and not a specific layer
         if(inrange) {
-            this.loadQueue = OpenLayers.Array.filter(this.layers, function(lyr) {
-                return lyr.visibility;
-            }).length;
+            var validLayers = OpenLayers.Array.filter(this.layers, function(lyr) {
+                return lyr.visibility && lyr.calculateInRange();
+            });
+            this.loadQueue = validLayers.length;
             
             this.canTick = !this.loadQueue;
             //console.debug('canTick:FALSE\nQueueCount:' + this.loadQueue);
-        }
-        for(var i = 0, len = this.layers.length; i < len; i++) {
-            if(inrange) {
-                this.applyTime(this.layers[i], this.currentTime);
-            }
-            else {
-                this.layers[i].setVisibility(false);
+            
+            for(var i=0;i<validLayers.length;i++){
+                this.applyTime(validLayers[i], this.currentTime);
             }
         }
     },
