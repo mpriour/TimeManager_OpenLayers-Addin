@@ -120,7 +120,7 @@ OpenLayers.Control.TimeManager = OpenLayers.Class(OpenLayers.Control, {
 	 *     while the control waits for its time agents to be ready to advance.
 	 *     Default: 1
 	 */
-    maxFrameDelay:1,
+    maxFrameDelay: 1,
     
     /**
 	 * APIProperty: currentTime
@@ -440,6 +440,7 @@ OpenLayers.Control.TimeManager = OpenLayers.Class(OpenLayers.Control, {
             }
             else {
                 var intervalId, checkCount = 0, maxDelays = this.maxFrameDelay * 4;
+                this.clearTimer();
                 intervalId = setInterval(OpenLayers.Function.bind(function() {
                     var doTick = this.canTickCheck() || checkCount++ >= maxDelays;
                     if(checkCount > maxDelays) {
@@ -450,6 +451,9 @@ OpenLayers.Control.TimeManager = OpenLayers.Class(OpenLayers.Control, {
                         this.events.triggerEvent('tick', {
                             currentTime : this.currentTime
                         });
+                        if(!this._stopped){
+                            this.timer = setInterval(OpenLayers.Function.bind(this.tick, this), 1000 / this.frameRate);
+                        }
                     }
                 }, this), 1000 / (this.frameRate * 4));
             }
@@ -465,6 +469,7 @@ OpenLayers.Control.TimeManager = OpenLayers.Class(OpenLayers.Control, {
         this.clearTimer();
         //start playing
         if(this.events.triggerEvent('play') !== false) {
+            delete this._stopped;
             this.tick();
             this.clearTimer(); //no seriously we really really only want 1 timer
             this.timer = setInterval(OpenLayers.Function.bind(this.tick, this), 1000 / this.frameRate);
@@ -477,6 +482,7 @@ OpenLayers.Control.TimeManager = OpenLayers.Class(OpenLayers.Control, {
 	stop:function(){
 		this.clearTimer();
 		this.events.triggerEvent('stop',{'rangeExceeded':false});
+		this._stopped=true;
 	},
 	/**
 	 * APIMethod: setRange
@@ -752,6 +758,7 @@ OpenLayers.Control.TimeManager = OpenLayers.Class(OpenLayers.Control, {
         }
         return (range.length)?range:null;
     },
+    
     guessPlaybackRate:function(){
         if(!this.timeAgents){return false;}
         var timeSpans=this.getValidTimeSpans();
@@ -834,7 +841,9 @@ OpenLayers.Control.TimeManager = OpenLayers.Class(OpenLayers.Control, {
             }
         }
         return (validTimes.length) ? validTimes : null;
-    }, timeExtentsToIntervals: function(timeExtents) {
+    }, 
+    
+    timeExtentsToIntervals: function(timeExtents) {
         var intervals = [];
         for(var i = 0; i < timeExtents.length; ++i) {
             var timeParts = timeExtents[i].split("/");
@@ -847,7 +856,9 @@ OpenLayers.Control.TimeManager = OpenLayers.Class(OpenLayers.Control, {
             }
         }
         return (intervals.length) ? intervals : null;
-    }, getUniqueDates:function(dates) {
+    }, 
+    
+    getUniqueDates:function(dates) {
         //sort the times
         dates.sort(function(a, b) {
             return a - b;
@@ -864,7 +875,9 @@ OpenLayers.Control.TimeManager = OpenLayers.Class(OpenLayers.Control, {
         });
 
         return dates;
-    }, canTickCheck: function() {
+    }, 
+    
+    canTickCheck: function() {
         var canTick = false;
         for(var i = 0, len = this.timeAgents.length; i < len; i++) {
             canTick = this.timeAgents[i].canTick;
@@ -873,12 +886,15 @@ OpenLayers.Control.TimeManager = OpenLayers.Class(OpenLayers.Control, {
             }
         }
         return canTick;
-    }, clearTimer: function() {
+    }, 
+    
+    clearTimer: function() {
         if(this.timer) {
             clearInterval(this.timer);
             this.timer = null;
         }
     },
+	
 	CLASS_NAME:'OpenLayers.Control.TimeManager'
 });
 
