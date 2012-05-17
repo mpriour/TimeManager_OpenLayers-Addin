@@ -4,8 +4,8 @@
  * full text of the license. */
 
 /**
- * @requires OpenLayers.Control
- * @requires OpenLayers.Date
+ * @requires OpenLayers/Control.js
+ * @requires OpenLayers/BaseTypes/Date.js
  */
 
 /**
