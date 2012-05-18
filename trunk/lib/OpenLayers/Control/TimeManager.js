@@ -915,4 +915,4 @@ OpenLayers.TimeUnit = {
 
 //Adjust the OpenLayers date parse regex to handle BCE dates & years longer than 4 digits
 OpenLayers.Date.dateRegEx = 
-    /^(?:(-?\d{4,})(?:-(\d{2})(?:-(\d{2}))?)?)?(?:(?:T(\d{1,2}):(\d{2}):(\d{2}(?:\.\d+)?)(Z|(?:[+-]\d{1,2}(?::(\d{2}))?)))|Z)?$/;
+    /^(?:(-?\d+)(?:-(\d{2})(?:-(\d{2}))?)?)?(?:(?:T(\d{1,2}):(\d{2}):(\d{2}(?:\.\d+)?)(Z|(?:[+-]\d{1,2}(?::(\d{2}))?)))|Z)?$/;
