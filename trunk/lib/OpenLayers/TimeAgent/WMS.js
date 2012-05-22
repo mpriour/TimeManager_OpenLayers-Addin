@@ -56,7 +56,7 @@ OpenLayers.TimeAgent.WMS = OpenLayers.Class(OpenLayers.TimeAgent, {
             }
         }
         //add agentready listener
-        this.on({
+        this.events.on({
             agentready: this.doTick, 
             scope: this
         });
