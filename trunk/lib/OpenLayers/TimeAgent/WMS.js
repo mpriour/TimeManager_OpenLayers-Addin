@@ -55,6 +55,11 @@ OpenLayers.TimeAgent.WMS = OpenLayers.Class(OpenLayers.TimeAgent, {
                 });
             }
         }
+        //add agentready listener
+        this.on({
+            agentready: this.doTick, 
+            scope: this
+        });
     },
 
     addLayer : function(layer) {
@@ -83,8 +88,18 @@ OpenLayers.TimeAgent.WMS = OpenLayers.Class(OpenLayers.TimeAgent, {
     },
 
     onTick : function(evt) {
+        //first make sure that the TimeManager won't keep pushing ticks to us until we are really ready
+        this.timeManager.clearTimer();
         this.currentTime = evt.currentTime || this.timeManager.currentTime;
         //console.debug('CurrentTime:' + this.currentTime.toString());
+        
+        //if we can tick then we call doTick here, if not then we wait for agentready event to call it
+        if(this.canTick){
+            this.doTick(evt);
+        }
+    },
+    
+    doTick : function(evt) {
         var inrange = this.currentTime <= this.range[1] && this.currentTime >= this.range[0];
         //this is an inrange flag for all the entire time range of layers managed by
         //this time agent and not a specific layer
@@ -100,6 +115,14 @@ OpenLayers.TimeAgent.WMS = OpenLayers.Class(OpenLayers.TimeAgent, {
             for(var i=0;i<validLayers.length;i++){
                 this.applyTime(validLayers[i], this.currentTime);
             }
+        }
+        this.continuePlayback();
+    },
+    
+    continuePlayback : function(){
+        if(this.timeManager && !this.timeManager._stopped){
+            //set a single timeout on the time manager to tick again
+            setTimeout(OpenLayers.Function.bind(this.timeManager.tick, this.timeManager), 1000 / this.timeManager.frameRate);
         }
     },
 
@@ -188,6 +211,7 @@ OpenLayers.TimeAgent.WMS = OpenLayers.Class(OpenLayers.TimeAgent, {
         if(this.loadQueue <= 0) {
             this.canTick = true;
             //console.debug('canTick:TRUE');
+            this.events.triggerEvent('agentready');
         }
     },
 
