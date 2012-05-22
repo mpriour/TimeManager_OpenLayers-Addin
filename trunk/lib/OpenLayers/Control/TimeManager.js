@@ -457,6 +457,7 @@ OpenLayers.Control.TimeManager = OpenLayers.Class(OpenLayers.Control, {
                             currentTime : this.currentTime
                         });
                         if(!this._stopped){
+                            this.clearTimer();
                             this.timer = setInterval(OpenLayers.Function.bind(this.tick, this), 1000 / this.frameRate);
                         }
                     }
