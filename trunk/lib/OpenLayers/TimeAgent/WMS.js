@@ -83,29 +83,6 @@ OpenLayers.TimeAgent.WMS = OpenLayers.Class(OpenLayers.TimeAgent, {
     },
 
     onTick : function(evt) {
-        //first make sure that the TimeManager won't keep pushing ticks to us until we are really ready
-        if(this.timeManager && this.timeManager.playing){
-            this._playing = true;
-            this.timeManager.clearTimer();
-        }      
-        //if we can tick then we call doTick here, if not then we wait for agentready event to call it
-        if(this.canTick){
-            this.doTick(evt);
-        } else {
-             //add agentready listener
-            this.events.on({
-                agentready: this.doTick, 
-                scope: this
-            });   
-        }
-    },
-    
-    doTick : function(evt) {
-         //remove agentready listener
-        this.events.un({
-            agentready: this.doTick, 
-            scope: this
-        });
         this.currentTime = evt.currentTime || this.timeManager.currentTime;
         //console.debug('CurrentTime:' + this.currentTime.toString());
         var inrange = this.currentTime <= this.range[1] && this.currentTime >= this.range[0];
@@ -123,16 +100,6 @@ OpenLayers.TimeAgent.WMS = OpenLayers.Class(OpenLayers.TimeAgent, {
             for(var i=0;i<validLayers.length;i++){
                 this.applyTime(validLayers[i], this.currentTime);
             }
-        }
-        if(this._playing){
-            this.continuePlayback();
-        }
-    },
-    
-    continuePlayback : function(){
-        if(this.timeManager && (this.timeManager.playing && !this.timeManager._stopped)){
-            //set a single timeout on the time manager to tick again
-            setTimeout(OpenLayers.Function.bind(this.timeManager.tick, this.timeManager), 1000 / this.timeManager.frameRate);
         }
     },
 
@@ -221,9 +188,6 @@ OpenLayers.TimeAgent.WMS = OpenLayers.Class(OpenLayers.TimeAgent, {
         if(this.loadQueue <= 0) {
             this.canTick = true;
             //console.debug('canTick:TRUE');
-            this.events.triggerEvent('agentready', {
-                currentTime: this.timeManager.currentTime
-            });
         }
     },
 
