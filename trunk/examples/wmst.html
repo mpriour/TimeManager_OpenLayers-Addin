@@ -21,17 +21,17 @@
             map.addControl(timeCtl);
             var ol_wms = new OpenLayers.Layer.WMS( "OpenLayers WMS",
                 "http://vmap0.tiles.osgeo.org/wms/vmap0?", {layers: 'vmap0'} );
-			
-			var last5min = new Date(Math.floor(Date.now()/3e5)*3e5);
-			var last65min = new Date(Math.floor(Date.now()/3e5)*3e5-36e5)
+
+            var last5min = new Date(Math.floor(Date.now()/3e5)*3e5);
+            var last65min = new Date(Math.floor(Date.now()/3e5)*3e5-36e5)
 
             ia_wms = new OpenLayers.Layer.WMS("Nexrad", "http://mesonet.agron.iastate.edu/cgi-bin/wms/nexrad/n0r-t.cgi?", {
-				layers: "nexrad-n0r-wmst",
-				transparent: true,
-				format: 'image/png',
-				time:OpenLayers.Date.toISOString(last65min)
-			},{
-				metadata: {
+                layers: "nexrad-n0r-wmst",
+                transparent: true,
+                format: 'image/png',
+                time:OpenLayers.Date.toISOString(last65min)
+            },{
+                metadata: {
                     timeInterval: [last65min, last5min]
                 },
                 singleTile:true,
@@ -39,27 +39,27 @@
                 transitionEffect:'resize'
                 //buffer:0,
                 //smoothRedraw:true
-			});
-			
+            });
+
             timeCtl.events.on({
-				'tick': update_date,
-				'reset': update_date,
-				'stop':function(evt){if(evt.rangeExceeded)alert('End of time range')},
-				scope: timeCtl
-			});
+                'tick': update_date,
+                'reset': update_date,
+                'stop':function(evt){if(evt.rangeExceeded)alert('End of time range')},
+                scope: timeCtl
+            });
 
             map.addLayers([ol_wms, ia_wms]);
             map.addControl(new OpenLayers.Control.LayerSwitcher());
             map.zoomToExtent(new OpenLayers.Bounds(-100.898437,22.148438,-78.398437,39.726563));
-			update_date({
-				object: timeCtl,
-				currentTime: timeCtl.currentTime
-			});
+            update_date({
+                object: timeCtl,
+                currentTime: timeCtl.currentTime
+            });
         }
         function update_date(evt) {
             var time = this.currentTime||evt.currentTime;
-			OpenLayers.Util.getElement('year').value = time.getFullYear();
-			OpenLayers.Util.getElement('month').value = time.getMonth()+1;
+            OpenLayers.Util.getElement('year').value = time.getFullYear();
+            OpenLayers.Util.getElement('month').value = time.getMonth()+1;
             OpenLayers.Util.getElement('day').value = time.getDate();
             OpenLayers.Util.getElement('hour').value = time.getHours();
             OpenLayers.Util.getElement('minute').value = time.getMinutes();
@@ -73,29 +73,26 @@
         </div>
         <p id="shortdesc">
             Shows the use of the TimeManager control with a single simple WMS-T (time) layer<br>
-			Click on the PLAY button to start.
+            Click on the PLAY button to start.
         </p>
     <input size="4" type='text' id='year' value="" readonly="true" />-
-	<input size="2" type="text" id="month" value="" readonly="true" />-
-	<input size="2" type="text" id="day" value="" readonly="true" />T
-	<input type="text" size="2" id="hour" value="" readonly="true" />:
-	<input type="text" size="2" id="minute" value=""  readonly="true"/>:00
-	<div>
-		<button type="button" onclick="timeCtl.loop=false;timeCtl.stop()">Stop</button>
-		&nbsp;|&nbsp;<button type="button" onclick="timeCtl.reset()">Reset</button>
-		&nbsp;|&nbsp;<button type="button" onclick="timeCtl.loop=true;timeCtl.play()">Loop</button>
-		&nbsp;|&nbsp;<button type="button" onclick="timeCtl.tick()">Step</button>
-		&nbsp;|&nbsp;<button type="button" onclick="timeCtl.play()">Play</button>
-	</div>
+    <input size="2" type="text" id="month" value="" readonly="true" />-
+    <input size="2" type="text" id="day" value="" readonly="true" />T
+    <input type="text" size="2" id="hour" value="" readonly="true" />:
+    <input type="text" size="2" id="minute" value=""  readonly="true"/>:00
+    <div>
+        <button type="button" onclick="timeCtl.loop=false;timeCtl.stop()">Stop</button>
+        &nbsp;|&nbsp;<button type="button" onclick="timeCtl.reset()">Reset</button>
+        &nbsp;|&nbsp;<button type="button" onclick="timeCtl.loop=true;timeCtl.play()">Loop</button>
+        &nbsp;|&nbsp;<button type="button" onclick="timeCtl.tick()">Step</button>
+        &nbsp;|&nbsp;<button type="button" onclick="timeCtl.play()">Play</button>
+    </div>
     <div id="map" class="smallmap"></div>
     <div id="docs">
         <p>WMS-T example: hit PLAY, and the radar image will change along with the<br>
-		time display. Uses the OpenLayers.Control.TimeManager to update the date<br>
-		elements with the time of the animation. Starts 1 hour before the nearest 5 min<br>
-		interval to the current time.</p>
+        time display. Uses the OpenLayers.Control.TimeManager to update the date<br>
+        elements with the time of the animation. Starts 1 hour before the nearest 5 min<br>
+        interval to the current time.</p>
     </div>
   </body>
 </html>
-
-
-
