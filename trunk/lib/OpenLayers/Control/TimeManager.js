@@ -288,7 +288,10 @@ OpenLayers.Control.TimeManager = OpenLayers.Class(OpenLayers.Control, {
             this.events.triggerEvent('rangemodified');
         }
         if(this.range && !this.currentTime) {
-            this.currentTime = new Date(this.range[(this.step > 0) ? 0 : 1].getTime());
+            this.setTime(new Date(this.range[(this.step > 0) ? 0 : 1].getTime()));
+        } else if(this.currentTime){
+            //force a tick call and maybe a tick event
+            this.setTime(this.currentTime);
         }
         //set map agents for layer additions and removal
         this.map.events.on({

@@ -86,8 +86,8 @@ OpenLayers.TimeAgent.WMS = OpenLayers.Class(OpenLayers.TimeAgent, {
         this.currentTime = evt.currentTime || this.timeManager.currentTime;
         //console.debug('CurrentTime:' + this.currentTime.toString());
         var inrange = this.currentTime <= this.range[1] && this.currentTime >= this.range[0];
-        //this is an inrange flag for all the entire time range of layers managed by
-        //this time agent and not a specific layer
+        //this is an inrange flag for all the entire value range of layers managed by
+        //this dimension agent and not a specific layer
         if(inrange) {
             var validLayers = OpenLayers.Array.filter(this.layers, function(lyr) {
                 return lyr.visibility && lyr.calculateInRange();
@@ -95,10 +95,35 @@ OpenLayers.TimeAgent.WMS = OpenLayers.Class(OpenLayers.TimeAgent, {
             this.loadQueue = validLayers.length;
             
             this.canTick = !this.loadQueue;
-            //console.debug('canTick:FALSE\nQueueCount:' + this.loadQueue);
+            //console.debug('WMS Agent QueueCount:' + this.loadQueue);
             
-            for(var i=0;i<validLayers.length;i++){
-                this.applyTime(validLayers[i], this.currentTime);
+            for(var i=0;i<this.layers.length;i++){
+                this.applyTime(this.layers[i], this.currentTime);
+            }
+        } else {
+            //the dimension manager fired a tick with a value outside of the full data range of this agent
+            //we want to turn off the display of layers but not change their visibility
+            //normally this would be taken care of the map's moveTo function, but the map is not moving
+            //in space, only in time or other non XY dimension.
+            for(var i=0;i<this.layers.length;i++){
+                //copied from parts of Map::moveTo section preceeding the ...triggerEvent("move") call
+                var layer = this.layers[i];
+                var inRange = layer.calculateInRange();
+                if (layer.inRange != inRange || !inRange && layer.div.style.display != "none") {
+                    // the inRange property has changed. If the layer is
+                    // no longer in range, we turn it off right away. If
+                    // any layer was possiblly in range, the applyDimension
+                    // call above would turn on the layer.
+                    layer.inRange = inRange;
+                    if (!inRange) {
+                        layer.display(false);
+                    }
+                    if(layer.map){
+                        layer.map.events.triggerEvent("changelayer", {
+                            layer: layer, property: "visibility"
+                        });    
+                    }
+                }
             }
         }
     },
